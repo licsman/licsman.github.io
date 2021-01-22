@@ -1,0 +1,340 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="Flink集成Hive的基本方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink-1.12集成Hive">
+<meta property="og:url" content="https://licsman.github.io/2021/01/18/Flink-1-12%E9%9B%86%E6%88%90Hive/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="Flink集成Hive的基本方式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg">
+<meta property="og:image" content="https://licsman.github.io/images/641">
+<meta property="og:image" content="https://licsman.github.io/images/642">
+<meta property="og:image" content="https://licsman.github.io/images/643">
+<meta property="og:image" content="https://licsman.github.io/images/644">
+<meta property="article:published_time" content="2021-01-18T03:35:51.000Z">
+<meta property="article:modified_time" content="2021-01-20T08:56:59.077Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta property="article:tag" content="hive">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg"><title>Flink-1.12集成Hive | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/01/18/Flink-1-12%E9%9B%86%E6%88%90Hive/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Flink-1.12集成Hive</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-01-18</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-01-20</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.9k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">23分</span></span></div></header><div class="post-body"><p><img src="/images/navbar-brand-logo.jpg" alt="img"></p>
+<p>使用Hive构建数据仓库已经成为了比较普遍的一种解决方案。目前，一些比较常见的大数据处理引擎，都无一例外兼容Hive。Flink从1.9开始支持集成Hive，不过1.9版本为beta版，不推荐在生产环境中使用。在Flink1.10版本中，标志着对 Blink的整合宣告完成，对 Hive 的集成也达到了生产级别的要求。值得注意的是，不同版本的Flink对于Hive的集成有所差异，本文将以最新的Flink1.12版本为例，阐述Flink集成Hive的简单步骤，以下是全文，希望对你有所帮助。</p>
+<a id="more"></a>
+
+
+        <h1 id="1-Flink集成Hive的基本方式"   >
+          <a href="#1-Flink集成Hive的基本方式" class="heading-link"><i class="fas fa-link"></i></a>1. Flink集成Hive的基本方式</h1>
+      <p>Flink 与 Hive 的集成主要体现在以下两个方面:</p>
+<ul>
+<li>持久化元数据</li>
+</ul>
+<p>Flink利用 Hive 的 MetaStore 作为持久化的 Catalog，我们可通过<code>HiveCatalog</code>将不同会话中的 Flink 元数据存储到 Hive Metastore 中。例如，我们可以使用<code>HiveCatalog</code>将其 Kafka的数据源表存储在 Hive Metastore 中，这样该表的元数据信息会被持久化到Hive的MetaStore对应的元数据库中，在后续的 SQL 查询中，我们可以重复使用它们。</p>
+<ul>
+<li>利用 Flink 来读写 Hive 的表。</li>
+</ul>
+<p>Flink打通了与Hive的集成，如同使用SparkSQL或者Impala操作Hive中的数据一样，我们可以使用Flink直接读写Hive中的表。</p>
+<p><code>HiveCatalog</code>的设计提供了与 Hive 良好的兼容性，用户可以”开箱即用”的访问其已有的 Hive表。不需要修改现有的 Hive Metastore，也不需要更改表的数据位置或分区。</p>
+
+        <h1 id="2-Flink集成Hive的步骤"   >
+          <a href="#2-Flink集成Hive的步骤" class="heading-link"><i class="fas fa-link"></i></a>2. Flink集成Hive的步骤</h1>
+      
+        <h2 id="2-1-Flink支持的Hive版本"   >
+          <a href="#2-1-Flink支持的Hive版本" class="heading-link"><i class="fas fa-link"></i></a>2.1 Flink支持的Hive版本</h2>
+      <div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">大版本</th>
+<th align="left">V1</th>
+<th align="left">V2</th>
+<th align="left">V3</th>
+<th align="left">V4</th>
+<th align="left">V5</th>
+<th align="left">V6</th>
+<th align="left">V7</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1.0</td>
+<td align="left">1.0.0</td>
+<td align="left">1.0.1</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">1.1</td>
+<td align="left">1.1.0</td>
+<td align="left">1.1.1</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">1.2</td>
+<td align="left">1.2.0</td>
+<td align="left">1.2.1</td>
+<td align="left">1.2.2</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">2.0</td>
+<td align="left">2.0.0</td>
+<td align="left">2.0.1</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">2.1</td>
+<td align="left">2.1.0</td>
+<td align="left">2.1.1</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">2.2</td>
+<td align="left">2.2.0</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">2.3</td>
+<td align="left">2.3.0</td>
+<td align="left">2.3.1</td>
+<td align="left">2.3.2</td>
+<td align="left">2.3.3</td>
+<td align="left">2.3.4</td>
+<td align="left">2.3.5</td>
+<td align="left">2.3.6</td>
+</tr>
+<tr>
+<td align="left">3.1</td>
+<td align="left">3.1.0</td>
+<td align="left">3.1.1</td>
+<td align="left">3.1.2</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table></div>
+<p>值得注意的是，对于不同的Hive版本，可能在功能方面有所差异，这些差异取决于你使用的Hive版本，而不取决于Flink，一些版本的功能差异如下：</p>
+<ul>
+<li>Hive 内置函数在使用 Hive-1.2.0 及更高版本时支持。</li>
+<li>列约束，也就是 PRIMARY KEY 和 NOT NULL，在使用 Hive-3.1.0 及更高版本时支持。</li>
+<li>更改表的统计信息，在使用 Hive-1.2.0 及更高版本时支持。</li>
+<li><code>DATE</code>列统计信息，在使用 Hive-1.2.0 及更高版时支持。</li>
+<li>使用 Hive-2.0.x 版本时不支持写入 ORC 表。</li>
+</ul>
+
+        <h2 id="2-2-依赖项"   >
+          <a href="#2-2-依赖项" class="heading-link"><i class="fas fa-link"></i></a>2.2 依赖项</h2>
+      <p>本文以Flink1.12为例，集成的Hive版本为Hive2.3.4。集成Hive需要额外添加一些依赖jar包，并将其放置在Flink安装目录下的lib文件夹下，这样我们才能通过 Table API 或 SQL Client 与 Hive 进行交互。</p>
+<p>另外，Apache Hive 是基于 Hadoop 之上构建的, 所以还需要 Hadoop 的依赖，配置好HADOOP_CLASSPATH即可。这一点非常重要，否则在使用FlinkSQL Cli查询Hive中的表时，会报如下错误：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.ClassNotFoundException: org.apache.hadoop.mapred.JobConf</span><br></pre></td></tr></table></div></figure>
+
+<p><strong>配置HADOOP_CLASSPATH，需要在/etc/profile文件中配置如下的环境变量</strong>：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export HADOOP_CLASSPATH&#x3D;&#96;hadoop classpath&#96;</span><br></pre></td></tr></table></div></figure>
+
+<p>Flink官网提供了两种方式添加Hive的依赖项。第一种是使用 Flink 提供的 Hive Jar包(根据使用的 Metastore 的版本来选择对应的 Hive jar)，建议优先使用Flink提供的Hive jar包，这种方式比较简单方便。本文使用的就是此种方式。当然，如果你使用的Hive版本与Flink提供的Hive jar包兼容的版本不一致，你可以选择第二种方式，即别添加每个所需的 jar 包。</p>
+<p>下面列举了可用的jar包及其适用的Hive版本，我们可以根据使用的Hive版本，下载对应的jar包即可。比如本文使用的Hive版本为Hive2.3.4，所以只需要下载<strong>flink-sql-connector-hive-2.3.6</strong>即可，并将其放置在Flink安装目录的lib文件夹下。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">Metastore version</th>
+<th align="left">Maven dependency</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1.0.0 ~ 1.2.2</td>
+<td align="left"><code>flink-sql-connector-hive-1.2.2</code></td>
+</tr>
+<tr>
+<td align="left">2.0.0 ~2.2.0</td>
+<td align="left"><code>flink-sql-connector-hive-2.2.0</code></td>
+</tr>
+<tr>
+<td align="left">2.3.0 ~2.3.6</td>
+<td align="left"><code>flink-sql-connector-hive-2.3.6</code></td>
+</tr>
+<tr>
+<td align="left">3.0.0 ~ 3.1.2</td>
+<td align="left"><code>flink-sql-connector-hive-3.1.2</code></td>
+</tr>
+</tbody></table></div>
+<p>上面列举的jar包，是我们在使用Flink SQL Cli所需要的jar包，除此之外，根据不同的Hive版本，还需要添加如下jar包。以Hive2.3.4为例，除了上面的一个jar包之外，还需要添加下面两个jar包：</p>
+<p><strong>flink-connector-hive_2.11-1.12.0.jar</strong>和<strong>hive-exec-2.3.4.jar</strong>。其中<strong>hive-exec-2.3.4.jar</strong>包存在于Hive安装路径下的lib文件夹。<strong>flink-connector-hive_2.11-1.12.0.jar</strong>的下载地址为：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;repo1.maven.org&#x2F;maven2&#x2F;org&#x2F;apache&#x2F;flink&#x2F;flink-connector-hive_2.11&#x2F;1.12.0&#x2F;</span><br></pre></td></tr></table></div></figure>
+
+<blockquote>
+<p><strong>尖叫提示</strong>:Flink1.12集成Hive只需要添加如下三个jar包，以Hive2.3.4为例，分别为：</p>
+<p><strong>flink-sql-connector-hive-2.3.6</strong></p>
+<p><strong>flink-connector-hive_2.11-1.12.0.jar</strong></p>
+<p><strong>hive-exec-2.3.4.jar</strong></p>
+</blockquote>
+
+        <h2 id="2-3-Flink-SQL-Cli集成Hive"   >
+          <a href="#2-3-Flink-SQL-Cli集成Hive" class="heading-link"><i class="fas fa-link"></i></a>2.3 Flink SQL Cli集成Hive</h2>
+      <p>将上面的三个jar包添加至Flink的lib目录下之后，就可以使用Flink操作Hive的数据表了。以FlinkSQL Cli为例：</p>
+
+        <h2 id="2-4-配置sql-client-defaults-yaml"   >
+          <a href="#2-4-配置sql-client-defaults-yaml" class="heading-link"><i class="fas fa-link"></i></a>2.4 配置sql-client-defaults.yaml</h2>
+      <p>该文件时Flink SQL Cli启动时使用的配置文件，该文件位于Flink安装目录的conf/文件夹下，具体的配置如下，主要是配置catalog：</p>
+<p><img src="/images/641" alt="图片"></p>
+<p>除了上面的一些配置参数，Flink还提供了下面的一些其他配置参数：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="center">必选</th>
+<th align="center">默认值</th>
+<th align="center">类型</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">type</td>
+<td align="center">是</td>
+<td align="center">(无)</td>
+<td align="center">String</td>
+<td align="center">Catalog 的类型。创建 HiveCatalog 时，该参数必须设置为<code>&#39;hive&#39;</code>。</td>
+</tr>
+<tr>
+<td align="left">name</td>
+<td align="center">是</td>
+<td align="center">(无)</td>
+<td align="center">String</td>
+<td align="center">Catalog 的名字。仅在使用 YAML file 时需要指定。</td>
+</tr>
+<tr>
+<td align="left">hive-conf-dir</td>
+<td align="center">否</td>
+<td align="center">(无)</td>
+<td align="center">String</td>
+<td align="center">指向包含 hive-site.xml 目录的 URI。该 URI 必须是 Hadoop 文件系统所支持的类型。如果指定一个相对 URI，即不包含 scheme，则默认为本地文件系统。如果该参数没有指定，我们会在 class path 下查找hive-site.xml。</td>
+</tr>
+<tr>
+<td align="left">default-database</td>
+<td align="center">否</td>
+<td align="center">default</td>
+<td align="center">String</td>
+<td align="center">当一个catalog被设为当前catalog时，所使用的默认当前database。</td>
+</tr>
+<tr>
+<td align="left">hive-version</td>
+<td align="center">否</td>
+<td align="center">(无)</td>
+<td align="center">String</td>
+<td align="center">HiveCatalog 能够自动检测使用的 Hive 版本。我们建议<strong>不要</strong>手动设置 Hive 版本，除非自动检测机制失败。</td>
+</tr>
+<tr>
+<td align="left">hadoop-conf-dir</td>
+<td align="center">否</td>
+<td align="center">(无)</td>
+<td align="center">String</td>
+<td align="center">Hadoop 配置文件目录的路径。目前仅支持本地文件系统路径。我们推荐使用 <strong>HADOOP_CONF_DIR</strong> 环境变量来指定 Hadoop 配置。因此仅在环境变量不满足您的需求时再考虑使用该参数，例如当您希望为每个 HiveCatalog 单独设置 Hadoop 配置时。</td>
+</tr>
+</tbody></table></div>
+
+        <h2 id="2-5-操作Hive中的表"   >
+          <a href="#2-5-操作Hive中的表" class="heading-link"><i class="fas fa-link"></i></a>2.5 操作Hive中的表</h2>
+      <p>首先启动FlinkSQL Cli，命令如下：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;bin&#x2F;sql-client.sh embedded</span><br></pre></td></tr></table></div></figure>
+
+<p>接下来，我们可以查看注册的catalog</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Flink SQL&gt; show catalogs;</span><br><span class="line">default_catalog</span><br><span class="line">myhive</span><br></pre></td></tr></table></div></figure>
+
+<p>使用注册的myhive catalog</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Flink SQL&gt; use catalog myhive;</span><br></pre></td></tr></table></div></figure>
+
+<p>假设Hive中有一张users表，在Hive中查询该表：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">hive (default)&gt; select * from users;</span><br><span class="line">OK</span><br><span class="line">users.id        users.mame</span><br><span class="line">1       jack</span><br><span class="line">2       tom</span><br><span class="line">3       robin</span><br><span class="line">4       haha</span><br><span class="line">5       haha</span><br></pre></td></tr></table></div></figure>
+
+<p>查看对应的数据库表，我们可以看到Hive中已经存在的表，这样就可以使用FlinkSQL操作Hive中的表，比如查询，写入数据。</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Flink SQL&gt; show tables;</span><br><span class="line">Flink SQL&gt; select * from users;</span><br></pre></td></tr></table></div></figure>
+
+<p><img src="/images/642" alt="图片"></p>
+<p>向Hive表users中插入一条数据：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Flink SQL&gt; insert into users select 6,&#39;bob&#39;;</span><br></pre></td></tr></table></div></figure>
+
+<p>再次使用Hive客户端去查询该表的数据，会发现写入了一条数据。</p>
+<p>接下来，我们再在FlinkSQL Cli中创建一张kafka的数据源表：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE user_behavior ( </span><br><span class="line">    &#96;user_id&#96; BIGINT, -- 用户id</span><br><span class="line">    &#96;item_id&#96; BIGINT, -- 商品id</span><br><span class="line">    &#96;cat_id&#96; BIGINT, -- 品类id</span><br><span class="line">    &#96;action&#96; STRING, -- 用户行为</span><br><span class="line">    &#96;province&#96; INT, -- 用户所在的省份</span><br><span class="line">    &#96;ts&#96; BIGINT, -- 用户行为发生的时间戳</span><br><span class="line">    &#96;proctime&#96; AS PROCTIME(), -- 通过计算列产生一个处理时间列</span><br><span class="line">    &#96;eventTime&#96; AS TO_TIMESTAMP(FROM_UNIXTIME(ts, &#39;yyyy-MM-dd HH:mm:ss&#39;)), -- 事件时间</span><br><span class="line">     WATERMARK FOR eventTime AS eventTime - INTERVAL &#39;5&#39; SECOND  -- 定义watermark</span><br><span class="line"> ) WITH ( </span><br><span class="line">    &#39;connector&#39; &#x3D; &#39;kafka&#39;, -- 使用 kafka connector</span><br><span class="line">    &#39;topic&#39; &#x3D; &#39;user_behavior&#39;, -- kafka主题</span><br><span class="line">    &#39;scan.startup.mode&#39; &#x3D; &#39;earliest-offset&#39;, -- 偏移量</span><br><span class="line">    &#39;properties.group.id&#39; &#x3D; &#39;group1&#39;, -- 消费者组</span><br><span class="line">    &#39;properties.bootstrap.servers&#39; &#x3D; &#39;kms-2:9092,kms-3:9092,kms-4:9092&#39;, </span><br><span class="line">    &#39;format&#39; &#x3D; &#39;json&#39;, -- 数据源格式为json</span><br><span class="line">    &#39;json.fail-on-missing-field&#39; &#x3D; &#39;true&#39;,</span><br><span class="line">    &#39;json.ignore-parse-errors&#39; &#x3D; &#39;false&#39;</span><br><span class="line">);</span><br></pre></td></tr></table></div></figure>
+
+<p>查看表结构</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Flink SQL&gt; DESCRIBE user_behavior;</span><br></pre></td></tr></table></div></figure>
+
+<p><img src="/images/643" alt="图片"></p>
+<p>我们可以在Hive的客户端中执行下面命令查看刚刚在Flink SQLCli中创建的表</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">hive (default)&gt; desc formatted  user_behavior;</span><br><span class="line"># Detailed Table Information             </span><br><span class="line">Database:               default                  </span><br><span class="line">Owner:                  null                     </span><br><span class="line">CreateTime:             Sun Dec 20 16:04:59 CST 2020     </span><br><span class="line">LastAccessTime:         UNKNOWN                  </span><br><span class="line">Retention:              0                        </span><br><span class="line">Location:               hdfs:&#x2F;&#x2F;kms-1.apache.com:8020&#x2F;user&#x2F;hive&#x2F;warehouse&#x2F;user_behavior   </span><br><span class="line">Table Type:             MANAGED_TABLE            </span><br><span class="line">Table Parameters:                </span><br><span class="line">        flink.connector         kafka               </span><br><span class="line">        flink.format            json                </span><br><span class="line">        flink.json.fail-on-missing-field        true                </span><br><span class="line">        flink.json.ignore-parse-errors  false               </span><br><span class="line">        flink.properties.bootstrap.servers      kms-2:9092,kms-3:9092,kms-4:9092</span><br><span class="line">        flink.properties.group.id       group1              </span><br><span class="line">        flink.scan.startup.mode earliest-offset     </span><br><span class="line">        flink.schema.0.data-type        BIGINT              </span><br><span class="line">        flink.schema.0.name     user_id             </span><br><span class="line">        flink.schema.1.data-type        BIGINT              </span><br><span class="line">        flink.schema.1.name     item_id             </span><br><span class="line">        flink.schema.2.data-type        BIGINT              </span><br><span class="line">        flink.schema.2.name     cat_id              </span><br><span class="line">        flink.schema.3.data-type        VARCHAR(2147483647) </span><br><span class="line">        flink.schema.3.name     action              </span><br><span class="line">        flink.schema.4.data-type        INT                 </span><br><span class="line">        flink.schema.4.name     province            </span><br><span class="line">        flink.schema.5.data-type        BIGINT              </span><br><span class="line">        flink.schema.5.name     ts                  </span><br><span class="line">        flink.schema.6.data-type        TIMESTAMP(3) NOT NULL</span><br><span class="line">        flink.schema.6.expr     PROCTIME()          </span><br><span class="line">        flink.schema.6.name     proctime            </span><br><span class="line">        flink.schema.7.data-type        TIMESTAMP(3)        </span><br><span class="line">        flink.schema.7.expr     TO_TIMESTAMP(FROM_UNIXTIME(&#96;ts&#96;, &#39;yyyy-MM-dd HH:mm:ss&#39;))</span><br><span class="line">        flink.schema.7.name     eventTime           </span><br><span class="line">        flink.schema.watermark.0.rowtime        eventTime           </span><br><span class="line">        flink.schema.watermark.0.strategy.data-type     TIMESTAMP(3)        </span><br><span class="line">        flink.schema.watermark.0.strategy.expr  &#96;eventTime&#96; - INTERVAL &#39;5&#39; SECOND</span><br><span class="line">        flink.topic             user_behavior       </span><br><span class="line">        is_generic              true                </span><br><span class="line">        transient_lastDdlTime   1608451499          </span><br><span class="line">                 </span><br><span class="line"># Storage Information            </span><br><span class="line">SerDe Library:          org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe       </span><br><span class="line">InputFormat:            org.apache.hadoop.mapred.TextInputFormat         </span><br><span class="line">OutputFormat:           org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat   </span><br><span class="line">Compressed:             No                       </span><br><span class="line">Num Buckets:            -1                       </span><br><span class="line">Bucket Columns:         []                       </span><br><span class="line">Sort Columns:           []                       </span><br><span class="line">Storage Desc Params:             </span><br><span class="line">        serialization.format    1                   </span><br></pre></td></tr></table></div></figure>
+
+<blockquote>
+<p><strong>尖叫提示</strong>:在Flink中创建一张表，会把该表的元数据信息持久化到Hive的metastore中，我们可以在Hive的metastore中查看该表的元数据信息</p>
+</blockquote>
+<p>进入Hive的元数据信息库，本文使用的是MySQL。执行下面的命令：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SELECT </span><br><span class="line">    a.tbl_id, -- 表id</span><br><span class="line">    from_unixtime(create_time) AS create_time, -- 创建时间</span><br><span class="line">    a.db_id, -- 数据库id</span><br><span class="line">    b.name AS db_name, -- 数据库名称</span><br><span class="line">    a.tbl_name -- 表名称</span><br><span class="line">FROM TBLS AS a</span><br><span class="line">LEFT JOIN DBS AS b ON a.db_id &#x3D;b.db_id</span><br><span class="line">WHERE a.tbl_name &#x3D; &quot;user_behavior&quot;;</span><br></pre></td></tr></table></div></figure>
+
+<p><img src="/images/644" alt="图片"></p>
+
+        <h2 id="2-6-使用代码连接到-Hive"   >
+          <a href="#2-6-使用代码连接到-Hive" class="heading-link"><i class="fas fa-link"></i></a>2.6 使用代码连接到 Hive</h2>
+      <p>maven依赖</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- Flink Dependency --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.apache.flink&lt;&#x2F;groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;flink-connector-hive_2.11&lt;&#x2F;artifactId&gt;</span><br><span class="line">  &lt;version&gt;1.12.0&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">  &lt;groupId&gt;org.apache.flink&lt;&#x2F;groupId&gt;</span><br><span class="line">  &lt;artifactId&gt;flink-table-api-java-bridge_2.11&lt;&#x2F;artifactId&gt;</span><br><span class="line">  &lt;version&gt;1.12.0&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br><span class="line">&lt;!-- Hive Dependency --&gt;</span><br><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;org.apache.hive&lt;&#x2F;groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;hive-exec&lt;&#x2F;artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.3.4&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></div></figure>
+
+<p>代码</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public class HiveIntegrationDemo &#123;</span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        EnvironmentSettings settings &#x3D; EnvironmentSettings.newInstance().useBlinkPlanner().build();</span><br><span class="line">        TableEnvironment tableEnv &#x3D; TableEnvironment.create(settings);</span><br><span class="line"></span><br><span class="line">        String name            &#x3D; &quot;myhive&quot;;</span><br><span class="line">        String defaultDatabase &#x3D; &quot;default&quot;;</span><br><span class="line">        String hiveConfDir &#x3D; &quot;&#x2F;opt&#x2F;modules&#x2F;apache-hive-2.3.4-bin&#x2F;conf&quot;;</span><br><span class="line">        </span><br><span class="line">        HiveCatalog hive &#x3D; new HiveCatalog(name, defaultDatabase, hiveConfDir);</span><br><span class="line">        tableEnv.registerCatalog(&quot;myhive&quot;, hive);</span><br><span class="line">        &#x2F;&#x2F; 使用注册的catalog</span><br><span class="line">        tableEnv.useCatalog(&quot;myhive&quot;);</span><br><span class="line">        &#x2F;&#x2F; 向Hive表中写入一条数据 </span><br><span class="line">        String insertSQL &#x3D; &quot;insert into users select 10,&#39;lihua&#39;&quot;;</span><br><span class="line"></span><br><span class="line">        TableResult result2 &#x3D; tableEnv.executeSql(insertSQL);</span><br><span class="line">        System.out.println(result2.getJobClient().get().getJobStatus());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<p>提交程序，观察Hive表的变化：</p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bin&#x2F;flink run -m kms-1:8081 \</span><br><span class="line">-c com.flink.sql.hiveintegration.HiveIntegrationDemo \</span><br><span class="line">.&#x2F;original-study-flink-sql-1.0-SNAPSHOT.jar</span><br></pre></td></tr></table></div></figure>
+
+<ol start="3">
+<li>总结</li>
+</ol>
+<p>本文以最新的Flink1.12为例，阐述了Flink集成Hive的基本步骤，并对其注意事项进行了说明。文中也给出了如何通过FlinkSQL Cli和代码去操作Hive表的步骤。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/01/18/Flink-1-12%E9%9B%86%E6%88%90Hive/">https://licsman.github.io/2021/01/18/Flink-1-12%E9%9B%86%E6%88%90Hive/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/flink/">flink</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/hive/">hive</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2021/01/18/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93%E6%97%B6%E4%BB%A3/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Flink-1.12流批一体时代</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2021/01/14/Flink-1-12%E7%89%88%E6%9C%AC%E8%A7%A3%E6%9E%90/"><span class="paginator-prev__text">Flink-1.12版本解读（源码层面）</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Flink%E9%9B%86%E6%88%90Hive%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%96%B9%E5%BC%8F"><span class="toc-text">
+          1. Flink集成Hive的基本方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Flink%E9%9B%86%E6%88%90Hive%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="toc-text">
+          2. Flink集成Hive的步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Flink%E6%94%AF%E6%8C%81%E7%9A%84Hive%E7%89%88%E6%9C%AC"><span class="toc-text">
+          2.1 Flink支持的Hive版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E4%BE%9D%E8%B5%96%E9%A1%B9"><span class="toc-text">
+          2.2 依赖项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Flink-SQL-Cli%E9%9B%86%E6%88%90Hive"><span class="toc-text">
+          2.3 Flink SQL Cli集成Hive</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E9%85%8D%E7%BD%AEsql-client-defaults-yaml"><span class="toc-text">
+          2.4 配置sql-client-defaults.yaml</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%93%8D%E4%BD%9CHive%E4%B8%AD%E7%9A%84%E8%A1%A8"><span class="toc-text">
+          2.5 操作Hive中的表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%A0%81%E8%BF%9E%E6%8E%A5%E5%88%B0-Hive"><span class="toc-text">
+          2.6 使用代码连接到 Hive</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">7</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">6</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>

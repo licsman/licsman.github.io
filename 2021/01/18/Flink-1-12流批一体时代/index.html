@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="Flink-1-12流批一体时代已来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink-1.12流批一体时代">
+<meta property="og:url" content="https://licsman.github.io/2021/01/18/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93%E6%97%B6%E4%BB%A3/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="Flink-1-12流批一体时代已来">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210118153242126.png">
+<meta property="og:image" content="https://licsman.github.io/images/20201214113108152.png">
+<meta property="article:published_time" content="2021-01-18T07:30:14.000Z">
+<meta property="article:modified_time" content="2021-01-20T08:56:44.623Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg"><title>Flink-1.12流批一体时代 | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/01/18/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93%E6%97%B6%E4%BB%A3/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Flink-1.12流批一体时代</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-01-18</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-01-20</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.7k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">17分</span></span></div></header><div class="post-body"><p><img src="/images/navbar-brand-logo.jpg" alt="img"></p>
+
+        <h2 id="1-Flink1-12-Release"   >
+          <a href="#1-Flink1-12-Release" class="heading-link"><i class="fas fa-link"></i></a>1. Flink1.12 Release</h2>
+      <p>Apache Flink 社区很荣幸地宣布 Flink 1.12.0 版本正式发布！近 300 位贡献者参与了 Flink 1.12.0 的开发，提交了超过 1000 多个修复或优化。这些修改极大地提高了 Flink 的可用性，并且简化（且统一）了 Flink 的整个 API 栈。其中一些比较重要的修改包括：</p>
+<ul>
+<li><strong>在 DataStream API 上添加了高效的批执行模式的支持</strong>，这是批处理和流处理实现真正统一的运行时的一个重要里程碑。</li>
+</ul>
+<a id="more"></a>
+
+<ul>
+<li>实现了基于Kubernetes的高可用性（HA）方案，作为生产环境中，ZooKeeper方案之外的另外一种选择。</li>
+<li>扩展了 Kafka SQL connector，使其可以在 upsert 模式下工作，并且支持在 SQL DDL 中处理 connector 的 metadata。现在，时态表 Join 可以完全用 SQL 来表示，不再依赖于 Table API 了。</li>
+<li>PyFlink 中添加了对于 DataStream API 的支持，将 PyFlink 扩展到了更复杂的场景，比如需要对状态或者定时器 timer 进行细粒度控制的场景。除此之外，现在原生支持将 PyFlink 作业部署到 Kubernetes上。</li>
+</ul>
+<p><img src="/images/image-20210118153242126.png" alt="image-20210118153242126"></p>
+
+        <h2 id="2-新的功能和优化"   >
+          <a href="#2-新的功能和优化" class="heading-link"><i class="fas fa-link"></i></a>2. 新的功能和优化</h2>
+      
+        <h3 id="2-1-DataStream-API-支持批执行模式"   >
+          <a href="#2-1-DataStream-API-支持批执行模式" class="heading-link"><i class="fas fa-link"></i></a>2.1 DataStream API 支持批执行模式</h3>
+      <p>Flink 的核心 API 最初是针对特定的场景设计的，尽管 Table API / SQL 针对流处理和批处理已经实现了统一的 API，但当用户使用较底层的 API 时，仍然需要在批处理（DataSet API）和流处理（DataStream API）这两种不同的 API 之间进行选择。鉴于批处理是流处理的一种特例，将这两种 API 合并成统一的 API，有一些非常明显的好处，比如：</p>
+<ul>
+<li>可复用性：作业可以在流和批这两种执行模式之间自由地切换，而无需重写任何代码。因此，用户可以复用同一个作业，来处理实时数据和历史数据。</li>
+<li>维护简单：统一的 API 意味着流和批可以共用同一组 connector，维护同一套代码，并能够轻松地实现流批混合执行，例如 backfilling 之类的场景。</li>
+<li>考虑到这些优点，社区已朝着流批统一的 DataStream API 迈出了第一步：支持高效的批处理（FLIP-134）。<strong>从长远来看，这意味着 DataSet API 将被弃用</strong>（FLIP-131），其功能将被包含在 DataStream API 和 Table API / SQL 中。</li>
+</ul>
+<p>有限流上的批处理</p>
+<p>您已经可以使用 DataStream API 来处理有限流（例如文件）了，但需要注意的是，运行时并不“知道”作业的输入是有限的。为了优化在有限流情况下运行时的执行性能，新的 BATCH 执行模式，对于聚合操作，全部在内存中进行，且使用 sort-based shuffle（FLIP-140）和优化过的调度策略（请参见 Pipelined Region Scheduling 了解更多详细信息）。因此，DataStream API 中的 BATCH 执行模式已经非常接近 Flink 1.12 中 DataSet API 的性能。有关性能的更多详细信息，请查看 FLIP-140。</p>
+<p>在 Flink 1.12 中，默认执行模式为 STREAMING，要将作业配置为以 BATCH 模式运行，可以在提交作业的时候，设置参数 execution.runtime-mode：</p>
+<figure class="highlight sh"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ bin/flink run -Dexecution.runtime-mode=BATCH examples/streaming/WordCount.jar</span><br></pre></td></tr></table></div></figure>
+
+<p>或者通过编程的方式:</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRuntimeMode(RuntimeMode.BATCH);</span><br></pre></td></tr></table></div></figure>
+
+<blockquote>
+<p>注意：尽管 DataSet API 尚未被弃用，但我们建议用户优先使用具有 BATCH 执行模式的 DataStream API 来开发新的批作业，并考虑迁移现有的 DataSet 作业。</p>
+</blockquote>
+
+        <h3 id="2-2-新的-Data-Sink-API-Beta"   >
+          <a href="#2-2-新的-Data-Sink-API-Beta" class="heading-link"><i class="fas fa-link"></i></a>2.2 新的 Data Sink API (Beta)</h3>
+      <p>之前发布的 Flink 版本中，已经支持了 source connector 工作在流批两种模式下，因此在 Flink 1.12 中，社区着重实现了统一的 Data Sink API（FLIP-143）。新的抽象引入了 write/commit 协议和一个更加模块化的接口。Sink 的实现者只需要定义 what 和 how：SinkWriter，用于写数据，并输出需要 commit 的内容（例如，committables）；Committer 和 GlobalCommitter，封装了如何处理 committables。框架会负责 when 和 where：即在什么时间，以及在哪些机器或进程中 commit。</p>
+<p><img src="/images/20201214113108152.png" alt="img"></p>
+
+        <h3 id="2-3-基于-Kubernetes-的高可用-HA-方案"   >
+          <a href="#2-3-基于-Kubernetes-的高可用-HA-方案" class="heading-link"><i class="fas fa-link"></i></a>2.3 基于 Kubernetes 的高可用 (HA) 方案</h3>
+      <p>Flink 可以利用 Kubernetes 提供的内置功能来实现 JobManager 的 failover，而不用依赖 ZooKeeper。为了实现不依赖于 ZooKeeper 的高可用方案，社区在 Flink 1.12（FLIP-144）中实现了基于 Kubernetes 的高可用方案。该方案与 ZooKeeper 方案基于相同的接口[3]，并使用 Kubernetes 的 ConfigMap[4] 对象来处理从 JobManager 的故障中恢复所需的所有元数据。关于如何配置高可用的 standalone 或原生 Kubernetes 集群的更多详细信息和示例，请查阅文档[5]。</p>
+<blockquote>
+<p>注意：需要注意的是，这并不意味着 ZooKeeper 将被删除，这只是为 Kubernetes 上的 Flink 用户提供了另外一种选择。</p>
+</blockquote>
+
+        <h3 id="2-4-其他改变"   >
+          <a href="#2-4-其他改变" class="heading-link"><i class="fas fa-link"></i></a>2.4 其他改变</h3>
+      <ul>
+<li><p>将现有的 connector 迁移到新的 Data Source API</p>
+<p>在之前的版本中，Flink 引入了新的 Data Source API（FLIP-27），以允许实现同时适用于有限数据（批）作业和无限数据（流）作业使用的 connector 。在 Flink 1.12 中，社区从 FileSystem connector（FLINK-19161）出发，开始将现有的 source connector 移植到新的接口。</p>
+<p>注意: 新的 source 实现，是完全不同的实现，与旧版本的实现不兼容。</p>
+</li>
+<li><p>Pipelined Region 调度 (FLIP-119)</p>
+<p>在之前的版本中，Flink 对于批作业和流作业有两套独立的调度策略。Flink 1.12 版本中，引入了统一的调度策略， 该策略通过识别 blocking 数据传输边，将 ExecutionGraph 分解为多个 pipelined region。这样一来，对于一个 pipelined region 来说，仅当有数据时才调度它，并且仅在所有其所需的资源都被满足时才部署它；同时也可以支持独立地重启失败的 region。对于批作业来说，新策略可显著地提高资源利用率，并消除死锁。</p>
+</li>
+<li><p>支持 Sort-Merge Shuffle (FLIP-148)</p>
+<p>为了提高大规模批作业的稳定性、性能和资源利用率，社区引入了 sort-merge shuffle，以替代 Flink 现有的实现。这种方案可以显著减少 shuffle 的时间，并使用较少的文件句柄和文件写缓存（这对于大规模批作业的执行非常重要）。在后续版本中（FLINK-19614），Flink 会进一步优化相关性能。</p>
+<blockquote>
+<p>注意：该功能是实验性的，在 Flink 1.12 中默认情况下不启用。要启用 sort-merge shuffle，需要在 TaskManager 的网络配置[6]中设置合理的最小并行度。</p>
+</blockquote>
+</li>
+<li><p>Flink WebUI 的改进 (FLIP-75)</p>
+<p>作为对上一个版本中，Flink WebUI 一系列改进的延续，Flink 1.12 在 WebUI 上暴露了 JobManager 内存相关的指标和配置参数（FLIP-104）。对于 TaskManager 的指标页面也进行了更新，为 Managed Memory、Network Memory 和 Metaspace 添加了新的指标，以反映自 Flink 1.10（FLIP-102）开始引入的 TaskManager 内存模型的更改[7]。</p>
+</li>
+<li><p>Table API/SQL: SQL Connectors 中的 Metadata 处理</p>
+<p>如果可以将某些 source（和 format）的元数据作为额外字段暴露给用户，对于需要将元数据与记录数据一起处理的用户来说很有意义。一个常见的例子是 Kafka，用户可能需要访问 offset、partition 或 topic 信息、读写 kafka 消息中的 key 或 使用消息 metadata中的时间戳进行时间相关的操作。</p>
+<p>在 Flink 1.12 中，Flink SQL 支持了元数据列用来读取和写入每行数据中 connector 或 format 相关的列（FLIP-107）。这些列在 CREATE TABLE 语句中使用 METADATA（保留）关键字来声明。上面的示例同时也展示了如何在 temporal table join 中使用 Flink 1.12 中新增的 upsert-kafka connector。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> kafka_table (</span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">BIGINT</span>,</span><br><span class="line">  <span class="keyword">name</span> <span class="keyword">STRING</span>,</span><br><span class="line">  event_time <span class="built_in">TIMESTAMP</span>(<span class="number">3</span>) METADATA <span class="keyword">FROM</span> <span class="string">&#x27;timestamp&#x27;</span>, <span class="comment">-- access Kafka &#x27;timestamp&#x27; metadata</span></span><br><span class="line">  headers <span class="keyword">MAP</span>&lt;<span class="keyword">STRING</span>, <span class="keyword">BYTES</span>&gt; METADATA  <span class="comment">-- access Kafka &#x27;headers&#x27; metadata</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">&#x27;connector&#x27;</span> = <span class="string">&#x27;kafka&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;topic&#x27;</span> = <span class="string">&#x27;test-topic&#x27;</span>, </span><br><span class="line">  <span class="string">&#x27;format&#x27;</span> = <span class="string">&#x27;avro&#x27;</span></span><br><span class="line">);</span><br><span class="line">12345678910</span><br></pre></td></tr></table></div></figure>
+
+<p>在 Flink 1.12 中，已经支持 Kafka 和 Kinesis connector 的元数据，并且 FileSystem connector 上的相关工作也已经在计划中（FLINK-19903）。由于 Kafka record 的结构比较复杂，社区还专门为 Kafka connector 实现了新的属性[8]，以控制如何处理键／值对。关于 Flink SQL 中元数据支持的完整描述，请查看每个 connector 的文档[9]以及 FLIP-107 中描述的用例。</p>
+<p>Table API/SQL: Upsert Kafka Connector</p>
+<p>在某些场景中，例如读取 compacted topic 或者输出（更新）聚合结果的时候，需要将 Kafka 消息记录的 key 当成主键处理，用来确定一条数据是应该作为插入、删除还是更新记录来处理。为了实现该功能，社区为 Kafka 专门新增了一个 upsert connector（upsert-kafka），该 connector 扩展自现有的 Kafka connector，工作在 upsert 模式（FLIP-149）下。新的 upsert-kafka connector 既可以作为 source 使用，也可以作为 sink 使用，并且提供了与现有的 kafka connector 相同的基本功能和持久性保证，因为两者之间复用了大部分代码。</p>
+<p>要使用 upsert-kafka connector，必须在创建表时定义主键，并为键（key.format）和值（value.format）指定序列化反序列化格式。完整的示例，请查看最新的文档[10]。</p>
+</li>
+<li><p>Table API/SQL: SQL 中 支持 Temporal Table Join</p>
+<p>在之前的版本中，用户需要通过创建时态表函数（temporal table function） 来支持时态表 join（temporal table join） ，而在 Flink 1.12 中，用户可以使用标准的 SQL 语句 FOR SYSTEM_TIME AS OF（SQL：2011）来支持 join。此外，现在任意包含时间列和主键的表，都可以作为时态表，而不仅仅是 append-only 表。这带来了一些新的应用场景，比如将 Kafka compacted topic 或数据库变更日志（来自 Debezium 等）作为时态表。</p>
+</li>
+</ul>
+  <figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> orders (</span><br><span class="line">    order_id <span class="keyword">STRING</span>,</span><br><span class="line">    currency <span class="keyword">STRING</span>,</span><br><span class="line">    amount <span class="built_in">INT</span>,              </span><br><span class="line">    order_time <span class="built_in">TIMESTAMP</span>(<span class="number">3</span>),                </span><br><span class="line">    WATERMARK <span class="keyword">FOR</span> order_time <span class="keyword">AS</span> order_time - <span class="built_in">INTERVAL</span> <span class="string">&#x27;30&#x27;</span> <span class="keyword">SECOND</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  …</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Table backed by a Kafka compacted topic</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> latest_rates ( </span><br><span class="line">    currency <span class="keyword">STRING</span>,</span><br><span class="line">    rate <span class="built_in">DECIMAL</span>(<span class="number">38</span>, <span class="number">10</span>),</span><br><span class="line">    currency_time <span class="built_in">TIMESTAMP</span>(<span class="number">3</span>),</span><br><span class="line">    WATERMARK <span class="keyword">FOR</span> currency_time <span class="keyword">AS</span> currency_time - <span class="built_in">INTERVAL</span> ‘<span class="number">5</span>’ <span class="keyword">SECOND</span>,</span><br><span class="line">    PRIMARY <span class="keyword">KEY</span> (currency) <span class="keyword">NOT</span> <span class="keyword">ENFORCED</span>      </span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">&#x27;connector&#x27;</span> = <span class="string">&#x27;upsert-kafka&#x27;</span>,</span><br><span class="line">  …</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Event-time temporal table join</span></span><br><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">  o.order_id,</span><br><span class="line">  o.order_time,</span><br><span class="line">  o.amount * r.rate <span class="keyword">AS</span> amount,</span><br><span class="line">  r.currency</span><br><span class="line"><span class="keyword">FROM</span> orders <span class="keyword">AS</span> o, latest_rates <span class="keyword">FOR</span> SYSTEM_TIME <span class="keyword">AS</span> <span class="keyword">OF</span> o.order_time r</span><br><span class="line"><span class="keyword">ON</span> o.currency = r.currency;</span><br><span class="line">123456789101112131415161718192021222324252627282930</span><br></pre></td></tr></table></div></figure>
+
+
+
+<ul>
+<li><p>使用 Hive 表进行 Temporal Table Join</p>
+</li>
+<li><p>用户也可以将 Hive 表作为时态表来使用，Flink 既支持自动读取 Hive 表的最新分区作为时态表（FLINK-19644），也支持在作业执行时追踪整个 Hive 表的最新版本作为时态表。请参阅文档，了解更多关于如何在 temporal table join 中使用 Hive 表的示例。</p>
+</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/01/18/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93%E6%97%B6%E4%BB%A3/">https://licsman.github.io/2021/01/18/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93%E6%97%B6%E4%BB%A3/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/flink/">flink</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2021/03/12/Flink-1-12%E6%B5%81%E6%89%B9%E4%B8%80%E4%BD%93API%E5%AE%9E%E8%B7%B5/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Flink-1.12 API上手实践（源码层面）</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2021/01/18/Flink-1-12%E9%9B%86%E6%88%90Hive/"><span class="paginator-prev__text">Flink-1.12集成Hive</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Flink1-12-Release"><span class="toc-text">
+          1. Flink1.12 Release</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%96%B0%E7%9A%84%E5%8A%9F%E8%83%BD%E5%92%8C%E4%BC%98%E5%8C%96"><span class="toc-text">
+          2. 新的功能和优化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-DataStream-API-%E6%94%AF%E6%8C%81%E6%89%B9%E6%89%A7%E8%A1%8C%E6%A8%A1%E5%BC%8F"><span class="toc-text">
+          2.1 DataStream API 支持批执行模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%96%B0%E7%9A%84-Data-Sink-API-Beta"><span class="toc-text">
+          2.2 新的 Data Sink API (Beta)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%9F%BA%E4%BA%8E-Kubernetes-%E7%9A%84%E9%AB%98%E5%8F%AF%E7%94%A8-HA-%E6%96%B9%E6%A1%88"><span class="toc-text">
+          2.3 基于 Kubernetes 的高可用 (HA) 方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E5%85%B6%E4%BB%96%E6%94%B9%E5%8F%98"><span class="toc-text">
+          2.4 其他改变</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">7</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">6</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>
