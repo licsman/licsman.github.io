@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大数据相关整理">
+<meta property="og:url" content="https://licsman.github.io/2021/03/17/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E6%95%B4%E7%90%86/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317181507581.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317181631085.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317182125052.png">
+<meta property="article:published_time" content="2021-03-17T10:11:57.000Z">
+<meta property="article:modified_time" content="2021-03-17T10:27:35.312Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/image-20210317181507581.png"><title>大数据相关整理 | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/03/17/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E6%95%B4%E7%90%86/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">大数据相关整理</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.2k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">12分</span></span></div></header><div class="post-body">
+        <h1 id="1-大数据相关的工作内容"   >
+          <a href="#1-大数据相关的工作内容" class="heading-link"><i class="fas fa-link"></i></a>1. 大数据相关的工作内容</h1>
+      <p>大数据相关工作主要分为数据开发、平台开发、基础架构三部分。 </p>
+<p><strong>数据开发：</strong>主要包括数据仓库、离线/实时数据开发等工作内容。比较重要的知识点和工具集如下：</p>
+<ul>
+<li><strong>数据仓库</strong> <ol>
+<li>数据仓库理论（Kimball、Inmon）、仓库分层、数据仓库模型（星型、雪花、星座）、数据集市等。 </li>
+<li>大数据环境下数据仓库通过Hive来构建。</li>
+</ol>
+</li>
+</ul>
+<a id="more"></a>
+
+<ul>
+<li><strong>离线数据开发</strong> <ol>
+<li>大部分基于数据仓库进行分析，主要语言为sql结构化查询语言，机器学习算法等； </li>
+<li>离线处理工具：Hive、Spark、pig(很少使用)。</li>
+</ol>
+</li>
+<li><strong>实时数据开发</strong> <ol>
+<li>实时数据处理，实时推荐、金融风控、异常实时检测等应用场景，数据时效性越来越重要。 </li>
+<li>实时处理框架：structed streaming(小批量，伪实时）、strom(实时，吞吐性能不好)、flink（目前最火，实时处理，吞吐性能好，批流合一，发展趋势，重点掌握）。</li>
+</ol>
+</li>
+</ul>
+<p><strong>平台开发：</strong>平台开发的主要作用是提升业务人员和数据开发人员的工作效率，加速数据流通。包括数据资产管理、自助分析平台、数据报表(可视化)平台、数据采集迁移平台、开发协作平台、数据接口服务等内容。</p>
+<ul>
+<li><p><strong>数据资产管理</strong> </p>
+<ol>
+<li>又称数据治理，企业数据资产平台，可大致分为元数据管理、数据指标体系、数据质量管理等模块；成熟度标准可参照《GBT 36073-2018 数据管理能力成熟度评估模型》 </li>
+<li>数据爆炸时代，资产管理越来越重要，资产管理概念比较大（每个企业业务不同，实施起来侧重点不同），比较合理的突破点是先从元数据管理和指标体系入手。 </li>
+<li>数据治理开源框架：atlas</li>
+</ol>
+</li>
+<li><p><strong>自助分析平台</strong> </p>
+<ol>
+<li>成本考虑，将数据分析能力从数据开发人员下放到一般业务人员或数据分析人员； </li>
+<li>为数据分析师提供方便易用的数据分析平台； </li>
+<li>开源框架：zeppelin、presto等交互式分析查询引擎，我们基于sparksql自研。</li>
+</ol>
+</li>
+<li><p><strong>数据报表（可视化）平台</strong> </p>
+<p>企业BI平台，计算和展示企业运营发展关键指标、稳定指标的发展趋势，支持运营调度和分析决策。</p>
+</li>
+<li><p><strong>数据采集迁移</strong> </p>
+<ol>
+<li>数据开发具备一定规模后，从数据采集、ETL、挖掘分析、到最后的可视化，都需要提效。制定好数据采集和迁移标准，然后平台化可以很好的解决这个问题。 </li>
+<li>开源框架：数据埋点、canal(mysql binlog订阅)、maxwell(对业务库有侵入)、datax等。</li>
+</ol>
+</li>
+<li><p><strong>开发协作流程</strong> </p>
+<ol>
+<li>同上主要解决数据开发人员效率问题，由原始的shell脚本方式提交，发展成可视化平台方式提交，提供串行、并行等工作流设置。</li>
+<li>工作流开源框架：airflow、azkaban(目前正在使用)。</li>
+</ol>
+</li>
+<li><p><strong>数据接口服务</strong> </p>
+<p>除数据报表（可视化）平台外，另一种数据提供方式，主要解决不同业务间、不同公司间数据获取问题。提供标准的传入参数和数据输出格式。基于底层存储(hbase/druid/mysql/clickhouse等)划分的微服务架构。</p>
+</li>
+</ul>
+<p><strong>基础架构：</strong>基础架构主要保障大数据集群稳定高可用，持续跟踪数据处理技术发展趋势，保持技术先进性。主要包括大数据基础环境运维和数据技术调研跟踪等工作内容。</p>
+<ul>
+<li><strong>大数据基础环境运维</strong> <ol>
+<li>处理大数据基础环境运行监控、服务安装等日常维护操作，单独安装大数据生态组件规划不好的话，会比较混乱。建议使用专业的工具； </li>
+<li>框架：ambari(开源，hdp版本)，cloudrea manager(分免费收费版，cdh版本)，国内的有星环(我可没有收他的广告费啊)。底层环境越稳定越好，财大气粗可以购买收费产品。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li><p><strong>数据技术调研、跟踪</strong> </p>
+<p>数据不断增加，技术不断创新、场景更加丰富，需要连续跟进技术的发展，提升数据流通速度(企业核心竞争力，数据洞察能力要先人一步)。 </p>
+<ol>
+<li>不断观察未来的技术趋势，lambda架构，内存计算、端计算等技术需要投入精力调研和落地。 </li>
+<li>面试加分项：计算框架容器化，弹性计算、k8s容器编排在大数据上的应用。</li>
+</ol>
+</li>
+</ul>
+<p><img src="/images/image-20210317181507581.png" alt="image-20210317181507581"></p>
+
+        <h1 id="2-大数据重要知识点"   >
+          <a href="#2-大数据重要知识点" class="heading-link"><i class="fas fa-link"></i></a>2. 大数据重要知识点</h1>
+      <p>说完了大数据的工作内容，我们再说一下面试过程中经常问到的知识点。个人认为数据处理技术从采集、存储、处理到最后的展现，无非就是数据存储、计算框架、消息队列、协调服务、资源协调等技术框架。</p>
+<p><strong>数据存储：</strong>这里的数据存储既包含构建数据仓库的hdfs、也包含用于分析展现的hbase、druid、clickhouse等特定场景数据库。</p>
+<ul>
+<li><p><strong>HDFS：分布式文件系统</strong> </p>
+<p>组件：client、namenode(HA)、datanode、journalnode</p>
+<p>知识点：HA实现方式，rpc通讯原理（代理、反射、需要实现特定的接口，局限性）</p>
+</li>
+<li><p><strong>★ Hbase：分布式列式数据库</strong> </p>
+<p>组件：client、hmaster、regionserver、zk、hdfs</p>
+<p>知识点：rowkey设计，数据读取写入流程。</p>
+</li>
+<li><p><strong>Druid：分布式分析型数据库</strong></p>
+</li>
+<li><p><strong>ClickHouse：分布式分析型数据库</strong></p>
+</li>
+</ul>
+<p><strong>计算框架：</strong>离线计算对应实时计算、批处理对应流处理。计算框架部分需要重点掌握，面试时出的题比较多也比较深，例如：spark的通信机制（早期的akka、现在的netty），flink为什么吞吐性能比storm高（flink内存模型重构，不会出现storm的内存溢出问题）等。后续我们另起文章详述。</p>
+<ul>
+<li><p><strong>批处理或者离线处理：mr、hive、spark、pig等</strong> </p>
+<p>★重点：hive、spark</p>
+</li>
+<li><p><strong>流处理或者实时处理：Flink(批流合一)、Storm、structed streaming等</strong> </p>
+<p>★重点：flink、spark</p>
+</li>
+</ul>
+<p><strong>消息队列：</strong>消息队列就要做消息队列的事情，现在kafka出了kSQL，甚是不理解，感觉有点不务正业。</p>
+<ul>
+<li><p><strong>★最常用：kafka</strong></p>
+<p>组件：producer、broker、consumer、zk；topic、partition、group、replication。</p>
+<p>重点：消费语义及如何实现(at lease once/exactly once/at most once)、副本机制、 版本信息(各版本之间的区别)。</p>
+</li>
+</ul>
+<p><strong>协调服务：</strong>用途最广，服务注册、发现，分布式锁等。</p>
+<ul>
+<li><p>★最常用：zookeeper</p>
+<p>重点：树状结构(类似文件系统)、选举机制、znode类型。</p>
+</li>
+</ul>
+<p><strong>资源协调服务：</strong>之前我们的资源协调服务是mesos，当时在离线计算、实时计算、自助分析等不同业务的资源划分上，没有解决相互间空闲资源的共用问题，可能是mesos研究不深导致的吧。改成yarn后，上述问题很容易就解决了（capacity schedule）。</p>
+<ul>
+<li><p><strong>★Yarn</strong> </p>
+<p>组件：client、applicationmaster、resourcemanager、nodemanager。</p>
+<p>重点：资源调度策略(capacity schedule、fair schedule)</p>
+</li>
+<li><p><strong>Mesos</strong> </p>
+</li>
+<li><p><strong>Kubernetes(k8s)</strong> </p>
+<p>未来发展趋势，加分项，弹性计算(计算框架容器化)。</p>
+</li>
+</ul>
+<p>上述加★的部分，我觉得是每个大数据技术从业人员必须要掌握的内容，能做到源码级理解最好，搞清楚框架的架构和设计模式，知其所以然，你出去面试的时候会比较轻松。</p>
+<p><img src="/images/image-20210317181631085.png" alt="image-20210317181631085"></p>
+
+        <h1 id="3-分布式系统架构"   >
+          <a href="#3-分布式系统架构" class="heading-link"><i class="fas fa-link"></i></a>3. 分布式系统架构</h1>
+      <p>上面我们讲到hdfs、hbase、spark、flink等技术框架都是分布式系统，那么分布式系统应该怎么学习呢？我们站在高层次去审视上述系统的时候，会发现它们都可以抽象出组件（基本组成部分）、存储、计算、通信等组成部分来。因此掌握上述组成部分就掌握了分布式系统。</p>
+<ul>
+<li><strong>组件：</strong>组成部分，每个分布式服务都有自己独特的组成部分，例如：spark(sparksql/spark streaming/mllib/graphx),hadoop(hdfs/mr/yarn)等。</li>
+<li><strong>存储：</strong>数据结构(数据块、hbase的region,spark的rdd/dataframe,flink的dataset/datastream)、内存分配、垃圾回收等机制。</li>
+<li><strong>计算：</strong>spark或tez的DAG(有向无环图)、flink的窗口机制、算子(map/flatmap/join/shuffle)、多线程处理等。</li>
+<li><strong>通信：</strong>网络编程(socket/io/nio)，通信框架akka、netty。基于事件驱动等模式。</li>
+</ul>
+<p>这部分内容有点方法论的意思，一通百通。再多说两句，开源框架的学习，一定要找第一手资料，什么是第一手资料呢？一般为框架自身带的说明性文档，apache的顶级项目都会有很详细的技术文档供查阅。</p>
+<p><img src="/images/image-20210317182125052.png" alt="image-20210317182125052"></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/03/17/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E6%95%B4%E7%90%86/">https://licsman.github.io/2021/03/17/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E6%95%B4%E7%90%86/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/flink/">flink</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/%E9%9D%A2%E8%AF%95/">面试</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/"><span class="paginator-prev__text">Flink-SQL-CDC实践及一致性的分析</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%86%85%E5%AE%B9"><span class="toc-text">
+          1. 大数据相关的工作内容</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%A4%A7%E6%95%B0%E6%8D%AE%E9%87%8D%E8%A6%81%E7%9F%A5%E8%AF%86%E7%82%B9"><span class="toc-text">
+          2. 大数据重要知识点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="toc-text">
+          3. 分布式系统架构</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">12</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">7</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>

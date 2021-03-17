@@ -1,0 +1,518 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink-SQL-CDC实践及一致性的分析">
+<meta property="og:url" content="https://licsman.github.io/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317173748360.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317173839095.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317173904599.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317173946752.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317174001800.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317174058945.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317174317375.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317175703294.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210317180046914.png">
+<meta property="article:published_time" content="2021-03-17T08:40:57.000Z">
+<meta property="article:modified_time" content="2021-03-17T10:06:42.690Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta property="article:tag" content="数据采集">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/image-20210317173748360.png"><title>Flink-SQL-CDC实践及一致性的分析 | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Flink-SQL-CDC实践及一致性的分析</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-17</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">5.4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">36分</span></span></div></header><div class="post-body">
+        <h1 id="1-目前行业中CDC背景"   >
+          <a href="#1-目前行业中CDC背景" class="heading-link"><i class="fas fa-link"></i></a>1. 目前行业中CDC背景</h1>
+      <p>数据准实时复制（CDC）是目前行内实时数据需求大量使用的技术，随着国产化的需求，我们也逐步考虑基于开源产品进行准实时数据同步工具的相关开发，逐步实现对商业产品的替代。我们评估了几种开源产品，Canal、Debezium、Flink CDC  等产品。作了如下的对比：</p>
+<a id="more"></a>
+
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">组件</th>
+<th align="left">Canal</th>
+<th align="left">Debezium</th>
+<th align="left">Flink</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">开源方</td>
+<td align="left">阿里</td>
+<td align="left">redhat</td>
+<td align="left">Flink社区+阿里</td>
+</tr>
+<tr>
+<td align="left">开发语言</td>
+<td align="left">Java</td>
+<td align="left">Java</td>
+<td align="left">Java</td>
+</tr>
+<tr>
+<td align="left">支持数据库</td>
+<td align="left">MySQL</td>
+<td align="left">“MongoDB、MySQL、PostgreSQL、SQL Server 、Oracle( 孵化)、DB2( 孵化)、Cassandra( 孵化)”</td>
+<td align="left">MySQL、PostgreSQL</td>
+</tr>
+<tr>
+<td align="left">是否支持bootstrap</td>
+<td align="left">否</td>
+<td align="left">是</td>
+<td align="left">是</td>
+</tr>
+<tr>
+<td align="left">是否支持解析DDL同步</td>
+<td align="left">是</td>
+<td align="left">是</td>
+<td align="left">是</td>
+</tr>
+<tr>
+<td align="left">是否支持HA</td>
+<td align="left">是</td>
+<td align="left">基于kafka-connector</td>
+<td align="left">Flink集群高可用</td>
+</tr>
+<tr>
+<td align="left">社区活跃(2020.07.20)</td>
+<td align="left">“release:2019.09.02,star:14.8k,last-commit:2020.03.13”</td>
+<td align="left">“release:2020.07.16,star:3.4k,last-commit:2020.07.16”</td>
+<td align="left">release:2020.07.14,star:14k,last-commit:2020.07.17</td>
+</tr>
+<tr>
+<td align="left">文档</td>
+<td align="left">中文，百度可以解决</td>
+<td align="left">英文，官方文档十分详细</td>
+<td align="left">官方中文文档，github readme 文档</td>
+</tr>
+<tr>
+<td align="left">MQ集成</td>
+<td align="left">RocketMQ、Kafka</td>
+<td align="left">kafka（按照主键分发）</td>
+<td align="left">kafka（支持轮转+自定义）、ES、PG、Mysql等</td>
+</tr>
+</tbody></table></div>
+
+        <h1 id="2-什么是-Flink-SQL-CDC-Connectors"   >
+          <a href="#2-什么是-Flink-SQL-CDC-Connectors" class="heading-link"><i class="fas fa-link"></i></a>2. 什么是 Flink SQL CDC Connectors</h1>
+      <p>在 Flink 1.11 引入了 CDC 机制，CDC 的全称是 Change Data Capture，用于捕捉数据库表的增删改查操作，是目前非常成熟的同步数据库变更方案。</p>
+<p>Flink CDC Connectors 是 Apache Flink 的一组源连接器，是可以从 MySQL、PostgreSQL 数据直接读取全量数据和增量数据的 Source Connectors，开源地址：<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://github.com/ververica/flink-cdc-connectors%E3%80%82" >https://github.com/ververica/flink-cdc-connectors。</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<p>目前(1.11版本)支持的 Connectors 如下：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">Connector</th>
+<th align="left">Database</th>
+<th align="left">Database Version</th>
+<th align="left">Flink Version</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">MySQL CDC</td>
+<td align="left">MySQL</td>
+<td align="left">Database: 5.7, 8.0.x JDBC Driver: 8.0.16</td>
+<td align="left">1.11+</td>
+</tr>
+<tr>
+<td align="left">Postgres CDC</td>
+<td align="left">PostgreSQL</td>
+<td align="left">Database:9.6, 10, 11, 12 JDBC Driver:42.2.12</td>
+<td align="left">1.11+</td>
+</tr>
+</tbody></table></div>
+<p>另外支持解析 Kafka 中 debezium-json 和 canal-json 格式的 Change Log，通过Flink 进行计算或者直接写入到其他外部数据存储系统(比如 Elasticsearch)，或者将 Changelog Json 格式的 Flink 数据写入到 Kafka:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">Format</th>
+<th align="left">Supported Connector</th>
+<th align="left">Flink Version</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Changelog Json</td>
+<td align="left">Apache Kafka</td>
+<td align="left">1.11+</td>
+</tr>
+</tbody></table></div>
+
+        <h1 id="3-Flink-SQL-CDC原理介绍"   >
+          <a href="#3-Flink-SQL-CDC原理介绍" class="heading-link"><i class="fas fa-link"></i></a>3. Flink SQL CDC原理介绍</h1>
+      <p>在公开的 CDC 调研报告中，Debezium 和 Canal 是最流行使用的 CDC 工具，这些 CDC 工具的核心原理是抽取数据库日志获取变更。在经过一系列调研后，我行采用的是 Debezium (支持全量、增量同步，同时支持 MySQL、PostgreSQL、Oracle 等数据库)。 </p>
+<p>Flink SQL CDC 内置了 Debezium 引擎，利用其抽取日志获取变更的能力，将  changelog 转换为 Flink SQL 认识的 RowData 数据。（以下右侧是 Debezium 的数据格式，左侧是 Flink 的 RowData 数据格式）。</p>
+<p><img src="/images/image-20210317173748360.png" alt="image-20210317173748360"></p>
+<p>RowData 代表了一行的数据，在 RowData 上面会有一个元数据的信息 RowKind，RowKind 里面包括了插入(+I)、更新前(-U)、更新后(+U)、删除(-D)，这样和数据库里面的 binlog 概念十分类似。通过 Debezium 采集的数据，包含了旧数据(before)和新数据行(after)以及原数据信息(source)，op 的 u 表示是 update 更新操作标识符（op 字段的值 c，u，d，r 分别对应 create，update，delete，reade），ts_ms 表示同步的时间戳。</p>
+
+        <h1 id="4-三种数据同步方案的分析"   >
+          <a href="#4-三种数据同步方案的分析" class="heading-link"><i class="fas fa-link"></i></a>4. 三种数据同步方案的分析</h1>
+      
+        <h2 id="4-1-方案一：Debezium-Kafka-计算程序-存储系统"   >
+          <a href="#4-1-方案一：Debezium-Kafka-计算程序-存储系统" class="heading-link"><i class="fas fa-link"></i></a>4.1 方案一：Debezium+Kafka+计算程序+存储系统</h2>
+      <p>目前我行在生产上采用的就是这个方案，采用 Debezium 订阅 MySQL 的 Binlog  传输到 Kafka，后端是由计算程序从 Kafka 里消费，最后将数据写入到其他存储，架构类似如下：</p>
+<p><img src="/images/image-20210317173839095.png" alt="image-20210317173839095"></p>
+<p>这种方案中利用 Kafka 消息队列做解耦，Change Log 可供任何其他业务系统使用，消费端可采用 Kafka Sink Connector 或者自定义消费程序，但是由于原生  Debezium 中的 Producer 端未采用幂等特性，因此消息可能存在重复，另外 Kafka Sink Connector(比如 JDBC Sink Connector 只能保证 At least once)或者自定义消费程序在保证数据的一致性上也有难度。</p>
+
+        <h2 id="4-2-方案二：Debezium-Kafka-Flink-SQL-存储系统"   >
+          <a href="#4-2-方案二：Debezium-Kafka-Flink-SQL-存储系统" class="heading-link"><i class="fas fa-link"></i></a>4.2 方案二：Debezium+Kafka+Flink SQL+存储系统</h2>
+      <p>从第二章节我们知道 Flink SQL 具备解析 Kafka 中 debezium-json 和 canal-json  格式的 Change Log 能力，我们可以采用如下同步架构：</p>
+<p><img src="/images/image-20210317173904599.png" alt="image-20210317173904599"></p>
+<p>与方案一的区别就是，采用 Flink 通过创建 Kafka 表，指定 format 格式为 debezium-json，然后通过 Flink 进行计算后或者直接插入到其他外部数据存储系统。方案二和方案一类似，组件多维护繁杂，而前述我们知道 Flink 1.11 中 CDC Connectors 内置了 Debezium 引擎，可以替换 Debezium+Kafka 方案，因此有了更简化的方案三。</p>
+
+        <h2 id="4-3-方案三：Flink-SQL-CDC-JDBC-Connector"   >
+          <a href="#4-3-方案三：Flink-SQL-CDC-JDBC-Connector" class="heading-link"><i class="fas fa-link"></i></a>4.3 方案三：Flink SQL CDC + JDBC Connector</h2>
+      <p>将如下架构虚线部分用 Flink SQL 替换：</p>
+<p><img src="/images/image-20210317173946752.png" alt="image-20210317173946752"></p>
+<p>我们得到如下改进的同步方案架构：</p>
+<p><img src="/images/image-20210317174001800.png" alt="image-20210317174001800"></p>
+<p>从官方的描述中，通过 Flink CDC connectors 替换 Debezium+Kafka 的数据采集模块，实现 Flink SQL 采集+计算+传输(ETL)一体化，优点很多：</p>
+<ul>
+<li>开箱即用，简单易上手</li>
+<li>减少维护的组件，简化实时链路，减轻部署成本</li>
+<li>减小端到端延迟</li>
+<li>Flink 自身支持 Exactly Once 的读取和计算</li>
+<li>数据不落地，减少存储成本</li>
+<li>支持全量和增量流式读取</li>
+<li>binlog 采集位点可回溯</li>
+</ul>
+
+        <h1 id="5-Flink-SQL-CDC-JDBC-Connector同步方案验证"   >
+          <a href="#5-Flink-SQL-CDC-JDBC-Connector同步方案验证" class="heading-link"><i class="fas fa-link"></i></a>5. Flink SQL CDC + JDBC Connector同步方案验证</h1>
+      
+        <h2 id="5-1-测试环境和sql脚本"   >
+          <a href="#5-1-测试环境和sql脚本" class="heading-link"><i class="fas fa-link"></i></a>5.1 测试环境和sql脚本</h2>
+      <p>测试环境测试场景 使用 Flink SQL CDC 从 MySQL 数据库同步数据到目标  MySQL，Kafka。</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> sbtest1 (</span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">INT</span>,</span><br><span class="line">  k <span class="built_in">INT</span>,</span><br><span class="line">  c <span class="keyword">STRING</span>,</span><br><span class="line">  <span class="keyword">pad</span> <span class="keyword">STRING</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">&#x27;connector&#x27;</span> = <span class="string">&#x27;mysql-cdc&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;hostname&#x27;</span> = <span class="string">&#x27;197.XXX.XXX.XXX&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;port&#x27;</span> = <span class="string">&#x27;3306&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;username&#x27;</span> = <span class="string">&#x27;debezium&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;password&#x27;</span> = <span class="string">&#x27;PASSWORD&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;database-name&#x27;</span> = <span class="string">&#x27;cdcdb&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;table-name&#x27;</span> = <span class="string">&#x27;sbtest1&#x27;</span>,</span><br><span class="line">  <span class="string">&#x27;debezium.snapshot.mode&#x27;</span> = <span class="string">&#x27;initial&#x27;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">--到DB</span></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> printSinkTable (</span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">INT</span>,</span><br><span class="line">  k <span class="built_in">INT</span>,</span><br><span class="line">  c <span class="keyword">STRING</span>,</span><br><span class="line">  <span class="keyword">pad</span> <span class="keyword">STRING</span>,</span><br><span class="line">  primary <span class="keyword">key</span> (<span class="keyword">id</span>) <span class="keyword">NOT</span> <span class="keyword">ENFORCED</span></span><br><span class="line">) <span class="keyword">with</span> (</span><br><span class="line"> <span class="string">&#x27;connector&#x27;</span> = <span class="string">&#x27;jdbc&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;url&#x27;</span> = <span class="string">&#x27;jdbc:mysql://197.XXX.XXX.XXX:3306/mydb?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;characterSetResults=UTF-8&amp;zeroDateTimeBehavior=CONVERT_TO_NULL&amp;serverTimezone=UTC&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;username&#x27;</span> = <span class="string">&#x27;debezium&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;password&#x27;</span> = <span class="string">&#x27;PASSWORD&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;table-name&#x27;</span> = <span class="string">&#x27;sbtest&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;driver&#x27;</span> = <span class="string">&#x27;com.mysql.cj.jdbc.Driver&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;sink.buffer-flush.interval&#x27;</span> = <span class="string">&#x27;3s&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;sink.buffer-flush.max-rows&#x27;</span> = <span class="string">&#x27;1&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;sink.max-retries&#x27;</span> = <span class="string">&#x27;5&#x27;</span>);</span><br><span class="line"> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> printSinkTable <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> sbtest1;</span><br><span class="line"></span><br><span class="line"> <span class="comment">--到KAFKA</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> kafka_gmv (</span><br><span class="line">  <span class="keyword">id</span> <span class="built_in">INT</span>,</span><br><span class="line">  k <span class="built_in">INT</span>,</span><br><span class="line">  c <span class="keyword">STRING</span>,</span><br><span class="line">  <span class="keyword">pad</span> <span class="keyword">STRING</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">    <span class="string">&#x27;connector&#x27;</span> = <span class="string">&#x27;kafka-0.11&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;topic&#x27;</span> = <span class="string">&#x27;kafka_gmv&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;scan.startup.mode&#x27;</span> = <span class="string">&#x27;earliest-offset&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;properties.bootstrap.servers&#x27;</span> = <span class="string">&#x27;197.XXX.XXX.XXX:9092&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;format&#x27;</span> = <span class="string">&#x27;changelog-json&#x27;</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> kafka_gmv <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> sbtest1;</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="5-2-测试结论"   >
+          <a href="#5-2-测试结论" class="heading-link"><i class="fas fa-link"></i></a>5.2 测试结论</h2>
+      
+        <h3 id="5-2-1-功能测试"   >
+          <a href="#5-2-1-功能测试" class="heading-link"><i class="fas fa-link"></i></a>5.2.1  功能测试</h3>
+      <div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">目标场景</th>
+<th align="left">初始化操作</th>
+<th align="left">插入操作</th>
+<th align="left">更新操作</th>
+<th align="left">删除操作</th>
+<th align="left">数据一致性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">目标KAFKA</td>
+<td align="left">支持</td>
+<td align="left">正常</td>
+<td align="left">正常</td>
+<td align="left">正常</td>
+<td align="left">一致</td>
+</tr>
+<tr>
+<td align="left">目标MySQL</td>
+<td align="left">支持</td>
+<td align="left">正常</td>
+<td align="left">正常</td>
+<td align="left">正常</td>
+<td align="left">一致</td>
+</tr>
+</tbody></table></div>
+
+        <h3 id="5-2-2-异常测试"   >
+          <a href="#5-2-2-异常测试" class="heading-link"><i class="fas fa-link"></i></a>5.2.2 异常测试</h3>
+      <ul>
+<li>
+        <h4 id="常规功能测试"   >
+          <a href="#常规功能测试" class="heading-link"><i class="fas fa-link"></i></a>常规功能测试</h4>
+      </li>
+</ul>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">场景</th>
+<th align="left">操作</th>
+<th align="left">异常恢复</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">初始化</td>
+<td align="left">kill目标库</td>
+<td align="left">恢复同步任务后，目标库存在残留数据，jdbc sink 使用upset方式更新，数据能保障和源库一致</td>
+</tr>
+<tr>
+<td align="left">初始化</td>
+<td align="left">kill源库</td>
+<td align="left">和目标库异常恢复过程相同</td>
+</tr>
+<tr>
+<td align="left">同步数据</td>
+<td align="left">kill源库、目标库</td>
+<td align="left">同步任务恢复后，Flink会根据checkpoint位点，继续同步异常点时的GTID位点数据，保障数据不丢失</td>
+</tr>
+</tbody></table></div>
+<h4 id=""><a href="#" class="headerlink" title=""></a></h4><ul>
+<li>
+        <h4 id="基于-DNS-的数据库切换测试"   >
+          <a href="#基于-DNS-的数据库切换测试" class="heading-link"><i class="fas fa-link"></i></a>基于 DNS 的数据库切换测试</h4>
+      </li>
+</ul>
+<p>测试示意图：</p>
+<p><img src="/images/image-20210317174058945.png" alt="image-20210317174058945"></p>
+<ul>
+<li><strong>Flink 需要配置的参数</strong>：任务失败后延迟 5 秒重启，重试 10 次。restart-strategy: fixed-delay restart-strategy.fixed-delay.attempts: 10 restart-strategy.fixed-delay.delay: 5s。</li>
+<li><strong>MySQL 环境信息</strong>：一主库两个从库。</li>
+<li><strong>DNS 配置</strong>：DNS 申请了一个域名：XX.XX.cmbc.cn 策略：当前域名指向其中一个从库，探测数据库服务端口，每个 2 分钟自动探测一次。当前数据库异常后  DNS 修改指向到第二个从库。</li>
+<li><strong>操作系统和 JVM 缓存配置</strong>：JVM 缓存配置 30 秒，操作系统缓存 30 秒。</li>
+</ul>
+<p><strong>测试结果：</strong></p>
+<ol>
+<li>当 Flink 参数未设置上述参数的情况下，kill 当前访问数据库，Flink 任务报错退出，查看 DNS 没有访问记录。</li>
+<li>Flink 配置上述参数后，Flink 后台尝试访问上述数据库，本地 DNS 缓存在访问失败的情况下失效，重新请求 DNS 域名服务器获取新数据库访问信息，任务继续复制。</li>
+</ol>
+<ul>
+<li>
+        <h4 id="Flink-高可用测试"   >
+          <a href="#Flink-高可用测试" class="heading-link"><i class="fas fa-link"></i></a>Flink 高可用测试</h4>
+      </li>
+</ul>
+<p>在 Flink 高可用测试中，我们使用 Standalone 集群高可用性方案进行测试，一个主 JobManager，一个从 JobManager，当主节点异常之后，备选节点成为新的 leader，并接管 Flink 集群。新 JobManager 成为新的 leader 后，集群恢复正常，并可以进行任务的调度，异常的任务恢复运行。</p>
+<p>这里备选和主节点是一样的，也就是说每个 JobManager 都可以充当备选和主节点。官网的下图展示了这一过程：</p>
+<p><img src="/images/image-20210317174317375.png" alt="image-20210317174317375"></p>
+<p>异常测试步骤和结果如下：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">操作</th>
+<th align="left">集群恢复过程</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">kill JobManger 进程</td>
+<td align="left">集群所有任务失败，从JobManager成为新leader后，异常任务恢复。</td>
+</tr>
+<tr>
+<td align="left">kill TaskManager进程</td>
+<td align="left">JobManager 调度任务到其他slave节点，使用checkpoint中的信息恢复任务。</td>
+</tr>
+</tbody></table></div>
+
+        <h3 id="5-2-3-性能测试"   >
+          <a href="#5-2-3-性能测试" class="heading-link"><i class="fas fa-link"></i></a>5.2.3 性能测试</h3>
+      <p>性能测试进行了累计测试，用以检测 Flink cdc 的极限性能，分别测试了 kafka 和  MySQL 作为目标的场景。</p>
+<ul>
+<li>测试描述</li>
+</ul>
+<p>使用 sysbench 进行压测，插入 200 余万数据，表结构如下：</p>
+<figure class="highlight sql"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="string">`sbtest1`</span> (</span><br><span class="line">  <span class="string">`id`</span> <span class="built_in">int</span>(<span class="number">10</span>) <span class="keyword">unsigned</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  <span class="string">`k`</span> <span class="built_in">int</span>(<span class="number">10</span>) <span class="keyword">unsigned</span> <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;0&#x27;</span>,</span><br><span class="line">  <span class="string">`c`</span> <span class="built_in">char</span>(<span class="number">120</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">  <span class="string">`pad`</span> <span class="built_in">char</span>(<span class="number">60</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span> <span class="keyword">DEFAULT</span> <span class="string">&#x27;&#x27;</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span>),</span><br><span class="line">  <span class="keyword">KEY</span> <span class="string">`k_1`</span> (<span class="string">`k`</span>)</span><br><span class="line">)；</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p>累计性能测试结果：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left">目标端</th>
+<th align="left">性能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">目标KAFKA</td>
+<td align="left">10万+</td>
+</tr>
+<tr>
+<td align="left">目标MySQL-insert</td>
+<td align="left">1万+</td>
+</tr>
+<tr>
+<td align="left">目标MySQL-update</td>
+<td align="left">6000+</td>
+</tr>
+<tr>
+<td align="left">目标MySQL-delete</td>
+<td align="left">1.2万+</td>
+</tr>
+</tbody></table></div>
+
+        <h1 id="6-Flink-SQL-CDC-JDBC-Connector端到端一致性分析"   >
+          <a href="#6-Flink-SQL-CDC-JDBC-Connector端到端一致性分析" class="heading-link"><i class="fas fa-link"></i></a>6. Flink SQL CDC + JDBC Connector端到端一致性分析</h1>
+      <p>Flink SQL CDC + JDBC Connector 本质上是一个 Source 和 Sink 并行度为 1 的Flink Stream Application，Source 和 Sink 之间无 Operator，下面我们逐步分析 Flink SQL CDC + JDBC Connector 端到端如何保证一致性。</p>
+
+        <h2 id="6-1-端到端一致性实现条件"   >
+          <a href="#6-1-端到端一致性实现条件" class="heading-link"><i class="fas fa-link"></i></a>6.1 端到端一致性实现条件</h2>
+      <p>一致性就是业务正确性，在“流系统中间件”这个业务领域，端到端一致性就代表  Exacly Once Msg Processing(简称 EOMP)，即一个消息只被处理一次，造成一次效果。即使机器或软件出现故障，既没有重复数据，也不会丢数据。</p>
+<p>幂等就是一个相同的操作，无论重复多少次，造成的效果和只操作一次相等。</p>
+<p>流系统端到端链路较长，涉及到上游 Source 层、中间计算层和下游 Sink 层三部分，要实现端到端的一致性，需要实现以下条件：</p>
+<ul>
+<li>上游可以 replay，否则中间计算层收到消息后未计算，却发生 failure 而重启，消息就会丢失。</li>
+<li>记录消息处理进度，并保证存储计算结果不出现重复，二者是一个原子操作，或者存储计算结果是个幂等操作，否则若先记录处理进度，再存储计算结果时发生 failure，计算结果会丢失，或者是记录完计算结果再发生 failure，就会 replay 生成多个计算结果。</li>
+<li>中间计算结果高可用，应对下游在接到计算结果后发生 failure，并未成功处理该结果的场景，可以考虑将中间计算结果放在高可用的 DataStore里。</li>
+<li>下游去重，应对下游处理完消息后发生 failure，重复接收消息的场景，这种可通过给消息设置 SequcenceId 实现去重，或者下游实现幂等。</li>
+</ul>
+<p>在 Flink SQL CDC + JDBC Connector 方案中，上游是数据库系统的日志，是可以 replay 的，满足条件1“上游可 replay”，接下来我们分别分析 Flink SQL CDC 如何实现条件 2 和 3，JDBCConnector 如何实现条件 4，最终实现端到端的一致性。以 MySQL-&gt;MySQL 为例，架构图如下（目前 Flink SQL 是不支持  Source/Sink 并行度配置的，Flink SQL 中各算子并行度默认是根据 Source 的 Partition 数或文件数来决定的，而 DebeziumSource 的并行度是 1，因此整个 Flink Task 的并行度为 1）：</p>
+<p><img src="/images/image-20210317175703294.png" alt="image-20210317175703294"></p>
+
+        <h2 id="6-2-Flink-SQL-CDC-的一致性保证"   >
+          <a href="#6-2-Flink-SQL-CDC-的一致性保证" class="heading-link"><i class="fas fa-link"></i></a>6.2 Flink SQL CDC 的一致性保证</h2>
+      <p>Flink SQL CDC 用于获取数据库变更日志的 Source 函数是 DebeziumSourceFunction，且最终返回的类型是 RowData，该函数实现了 CheckpointedFunction，即通过 Checkpoint 机制来保证发生 failure 时不会丢数，实现 exactly once  语义，这部分在函数的注释中有明确的解释。</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">**</span><br><span class="line"> * The &#123;<span class="meta">@link</span> DebeziumSourceFunction&#125; is a streaming data source that pulls captured change data</span><br><span class="line"> * from databases into Flink.</span><br><span class="line"> * 通过Checkpoint机制来保证发生failure时不会丢数，实现exactly once语义</span><br><span class="line"> * &lt;p&gt;The source function participates in checkpointing and guarantees that no data is lost</span><br><span class="line"> * during a failure, and that the computation processes elements <span class="string">&quot;exactly once&quot;</span>.</span><br><span class="line"> * 注意：这个Source Function不能同时运行多个实例</span><br><span class="line"> * &lt;p&gt;Note: currently, the source function can<span class="string">&#x27;t run in multiple parallel instances.</span></span><br><span class="line"><span class="string"> *</span></span><br><span class="line"><span class="string"> * &lt;p&gt;Please refer to Debezium&#x27;</span>s documentation <span class="keyword">for</span> the available configuration properties:</span><br><span class="line"> * https:<span class="comment">//debezium.io/documentation/reference/1.2/development/engine.html#engine-properties&lt;/p&gt;</span></span><br><span class="line"> */</span><br><span class="line"><span class="meta">@PublicEvolving</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DebeziumSourceFunction</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">RichSourceFunction</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span></span></span><br><span class="line"><span class="class">  <span class="title">CheckpointedFunction</span>,</span></span><br><span class="line"><span class="class">  <span class="title">ResultTypeQueryable</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p>为实现 CheckpointedFunction，需要实现以下两个方法：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">CheckpointedFunction</span> </span>&#123;</span><br><span class="line">  <span class="comment">//做快照，把内存中的数据保存在checkpoint状态中</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">snapshotState</span><span class="params">(FunctionSnapshotContext var1)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//程序异常恢复后从checkpoint状态中恢复数据</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">initializeState</span><span class="params">(FunctionInitializationContext var1)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p>接下来我们看看 DebeziumSourceFunction 中都记录了哪些状态：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** Accessor for state in the operator state backend. </span></span><br><span class="line"><span class="comment">    offsetState中记录了读取的binlog文件和位移信息等，对应Debezium中的</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">transient</span> ListState&lt;<span class="keyword">byte</span>[]&gt; offsetState;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * State to store the history records, i.e. schema changes.</span></span><br><span class="line"><span class="comment"> * historyRecordsState记录了schema的变化等信息</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> FlinkDatabaseHistory</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">transient</span> ListState&lt;String&gt; historyRecordsState;</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p>再回到端到端一致性的条件 2 和 3</p>
+<blockquote>
+<p>2.记录消息处理进度，并保证存储计算结果不出现重复，二者是一个原子操作，或者存储计算结果是个幂等操作，否则若先记录处理进度，再存储计算结果时发生failure，计算结果会丢失，或者是记录完计算结果再发生failure，就会replay生成多个计算结果。</p>
+<p>3.中间计算结果高可用，应对下游在接到计算结果后发生failure，并未成功处理该结果的场景，可以考虑将中间计算结果放在高可用的DataStore里。</p>
+</blockquote>
+<p>我们发现在 Flink SQL CDC 是一个相对简易的场景，没有中间算子，是通过  Checkpoint 持久化 binglog 消费位移和 schema 变化信息的快照，来实现 Exactly Once。接下来我们分析 Sink 端。</p>
+
+        <h3 id="6-2-1-JDBC-Sink-Connector-如何保证一致性"   >
+          <a href="#6-2-1-JDBC-Sink-Connector-如何保证一致性" class="heading-link"><i class="fas fa-link"></i></a>6.2.1 JDBC Sink Connector 如何保证一致性</h3>
+      <p>我们在官网上发现对于 JDBC Sink Connector 的幂等性中有如下解释：</p>
+<blockquote>
+<p>如果定义了主键，JDBC 写入时是能够保证 Upsert 语义的， 如果 DB 不支持 Upsert 语法，则会退化成 DELETE + INSERT 语义。Upsert query 是原子执行的，可以保证幂等性。</p>
+</blockquote>
+<p>这个在官方文档中也详细描述了更新失败或者存在故障时候如何做出的处理，下面的表格是不同的 DB 对应不同的 Upsert 语法：</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="left"><strong>Database</strong></th>
+<th align="left"><strong>Upsert Grammar</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">MySQL</td>
+<td align="left">INSERT .. ON DUPLICATE KEY UPDATE ..</td>
+</tr>
+<tr>
+<td align="left">PostgreSQL</td>
+<td align="left">INSERT .. ON CONFLICT .. DO UPDATE SET ..</td>
+</tr>
+</tbody></table></div>
+<p>因此我们可以通过写入时保证 Upsert 语义，从而保证下游 Sink 端的幂等性，再  Review 一次到端到端一致性实现条件 4，下游去重也可以通过实现幂等从而实现下游的 Exactly Once 语义。</p>
+<blockquote>
+<p>4.下游去重，应对下游处理完消息后发生 failure，重复接收消息的场景，这种可通过给消息设置 SequcenceId 实现去重，或者下游实现幂等。</p>
+</blockquote>
+
+        <h3 id="-1"   >
+          <a href="#-1" class="heading-link"><i class="fas fa-link"></i></a></h3>
+      
+        <h3 id="6-2-2-Flink-SQL-CDC-JDBC-Sink-Connector-组合后如何保证一致性"   >
+          <a href="#6-2-2-Flink-SQL-CDC-JDBC-Sink-Connector-组合后如何保证一致性" class="heading-link"><i class="fas fa-link"></i></a>6.2.2 Flink SQL CDC + JDBC Sink Connector 组合后如何保证一致性</h3>
+      <p>在前两小节我们分析了组件各自如何保证一致性，接下来，我们分析组合后在源库异常、Flink 作业异常、目标库异常三种异常场景下如何保证端到端一致性。</p>
+<p><img src="/images/image-20210317180046914.png" alt="image-20210317180046914"></p>
+<ul>
+<li>
+        <h4 id="Debezium-Source-对-MySQL-进行-Snapshot-时发生异常"   >
+          <a href="#Debezium-Source-对-MySQL-进行-Snapshot-时发生异常" class="heading-link"><i class="fas fa-link"></i></a>Debezium Source 对 MySQL 进行 Snapshot 时发生异常</h4>
+      </li>
+</ul>
+<p>在 Flink Task 启动后，首先会进行 MySQL 全表扫描，也就是做 Snapshot，这里有个需要注意的地方就是，在 Snapshot 阶段，在扫描全表数据时，没有可用于恢复的位点，所以无法在全表扫描阶段去执行 Checkpoint。为了不执行 Checkpoint，MySQL 的 CDC 源表会让执行中的 Checkpoint 一直等待（通过持有 checkpoint 锁实现），甚至 Checkpoint 超时（如果表超级大，扫描耗时非常长）。这块可以从 DebeziumChangeConsumer 的代码中看到：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleBatch</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">   List&lt;ChangeEvent&lt;SourceRecord, SourceRecord&gt;&gt; changeEvents,</span></span></span><br><span class="line"><span class="function"><span class="params">   DebeziumEngine.RecordCommitter&lt;ChangeEvent&lt;SourceRecord, SourceRecord&gt;&gt; committer)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">   <span class="keyword">for</span> (ChangeEvent&lt;SourceRecord, SourceRecord&gt; event : changeEvents) &#123;</span><br><span class="line">    SourceRecord record = event.value();</span><br><span class="line">    deserialization.deserialize(record, debeziumCollector);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (isInDbSnapshotPhase) &#123;</span><br><span class="line">     <span class="keyword">if</span> (!lockHold) &#123;</span><br><span class="line">      MemoryUtils.UNSAFE.monitorEnter(checkpointLock);</span><br><span class="line">      lockHold = <span class="keyword">true</span>;</span><br><span class="line">            <span class="comment">//在snapshot阶段不做checkpoint</span></span><br><span class="line">      LOG.info(<span class="string">&quot;Database snapshot phase can&#x27;t perform checkpoint, acquired Checkpoint lock.&quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">if</span> (!isSnapshotRecord(record)) &#123;</span><br><span class="line">      MemoryUtils.UNSAFE.monitorExit(checkpointLock);</span><br><span class="line">      isInDbSnapshotPhase = <span class="keyword">false</span>;</span><br><span class="line">      LOG.info(<span class="string">&quot;Received record from streaming binlog phase, released checkpoint lock.&quot;</span>);</span><br><span class="line">     &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// emit the actual records. this also updates offset state atomically</span></span><br><span class="line">    emitRecordsUnderCheckpointLock(debeziumCollector.records, record.sourcePartition(), record.sourceOffset());</span><br><span class="line">   &#125;</span><br><span class="line">      ...</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p>在做 Snapshot 阶段，可能会碰到源库 MySQL 异常或者 Flink 任务本身异常，那我们分别分析下异常后如何恢复：</p>
+<ol>
+<li><strong>若遇到源库 MySQL 异常</strong>，Flink Task 发现无法连接数据库异常退出，重新启动 Flink Task（或者 retry），因为没有做 snapshot 没做 checkpoint，那么会重新再做一次 Snapshot，这些全量数据最后发送到目的 MySQL，由于下游 MySQL 实现了写幂等，因此最终保持一致性。</li>
+<li><strong>若遇到 Flink 任务异常</strong>，重新启动（或者 retry），同上面情况一样，重新做一次 Snapshot，最终也能保持一致性。</li>
+<li><strong>若遇到目标库 MySQL 异常</strong>，同场景一一致，Flink Task 无法往目标数据库写入异常退出，在需要重新启动或 retry 后，重新做一次 Snapshot，全量数据最后发送到目的 MySQL，由于目的下游 M 有 SQL 实现了写幂等，最终保持一致性。</li>
+</ol>
+<ul>
+<li>Snapshot 完成后读取 binlog 时发生异常</li>
+</ul>
+<p>在全量数据完成同步后，开始进行增量获取，此时 Flink 会进行定时 Checkpoint，将读取 binlog 的位移信息和 schema 信息存入到 StateBackend，若此时发生异常，那我们分析下异常后如何恢复：</p>
+<ol>
+<li><strong>若源 MySQL 异常</strong>，Flink Task 发现无法连接数据库异常退出，重新启动 Flink Task（或者 retry），将会从最近一次 Checkpoint 的数据进行恢复，由于可以读取到 mysql binlog 位移信息，实现继续同步，不会丢失数据，最终也能保持一致性。</li>
+<li><strong>若 Flink 任务异常</strong>，重新启动或 retry 后，同场景 1 一致，继续读取 binlog，能保持一致性。</li>
+<li><strong>若目的 MySQL 异常</strong>，jdbc connector 无法往目标数据库写入，cdc connector  读取到的 binlog 位移信息也不再更新，两个操作是一个原子性操作，在 Flink Task 恢复后，从最近一次 Checkpoint 进行恢复，最终保持一致性。</li>
+</ol>
+
+        <h2 id="6-3-总结"   >
+          <a href="#6-3-总结" class="heading-link"><i class="fas fa-link"></i></a>6.3 总结</h2>
+      <p>分布式系统中端到端一致性需要各个组件参与实现，Flink SQL CDC + JDBC Connector 可以通过如下方法保证端到端的一致性：</p>
+<ul>
+<li>源端是数据库的 binlog 日志，全量同步做 Snapshot 异常后可以再次做 Snapshot，增量同步时，Flink SQL CDC 中会记录读取的日志位移信息，也可以 replay</li>
+<li>Flink SQL CDC 作为 Source 组件，是通过 Flink Checkpoint 机制，周期性持久化存储数据库日志文件消费位移和状态等信息（StateBackend 将 checkpoint 持久化），记录消费位移和写入目标库是一个原子操作，保证发生 failure 时不丢数据，实现 Exactly Once</li>
+<li>JDBC Sink Connecotr 是通过写入时保证 Upsert 语义，从而保证下游的写入幂等性，实现 Exactly Once</li>
+</ul>
+<p>再来回顾一下端到端保持一致性的条件，发现全都能满足。</p>
+<p><strong>1.上游可以 replay</strong>，否则中间计算层收到消息后未计算，却发生 failure 而重启，消息就会丢失。</p>
+<p><strong>2.记录消息处理进度</strong>，并保证存储计算结果不出现重复，二者是一个原子操作，或者存储计算结果是个幂等操作，否则若先记录处理进度，再存储计算结果时发生 failure，计算结果会丢失，或者是记录完计算结果再发生 failure，就会 replay 生成多个计算结果。</p>
+<p><strong>3.中间计算结果高可用</strong>，应对下游在接到计算结果后发生 failure，并未成功处理该结果的场景，可以考虑将中间计算结果放在高可用的 DataStore 里。</p>
+<p><strong>4.下游去重</strong>，应对下游处理完消息后发生 failure，重复接收消息的场景，这种可通过给消息设置 SequcenceId 实现去重，或者下游实现幂等。</p>
+
+        <h1 id="7-Flink-SQL-CDC目前存在的缺陷"   >
+          <a href="#7-Flink-SQL-CDC目前存在的缺陷" class="heading-link"><i class="fas fa-link"></i></a>7. Flink SQL CDC目前存在的缺陷</h1>
+      <ul>
+<li>使用正则匹配原表后（多个源端表），到目标表无法进行一对一的映射。需要逐个匹配。</li>
+<li>CDC source 端定义时，需要指定所有字段，目前不支持省略字段定义。</li>
+<li>CDC 到 KAFKA 时无法按照主键进行自动分区分发、无法指定分区键分发数据。到 KAFKA 的数据格式指定（JSON，AVRO JSON等）。</li>
+<li>目标端支持需求：DB2、ADB/GreenPlum、Oracle 暂不支持。不支持 DDL同步，不支持表的创建。</li>
+<li>任务管理和监控的 REST API 不完善。 </li>
+</ul>
+<p><strong>参考资料：</strong></p>
+<ul>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77677075" >端到端一致性，流系统 Spark/Flink/Kafka/DataFlow 对比总结</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://developer.aliyun.com/article/777502" >基于 Flink SQL CDC 的实时数据同步方案</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://developer.aliyun.com/article/771773" >Flink SQL 1.11 新功能与最佳实践</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/53482103" >分布式快照算法</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/">https://licsman.github.io/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/flink/">flink</a></span><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86/">数据采集</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2021/03/17/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3%E6%95%B4%E7%90%86/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">大数据相关整理</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/16/%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4/"><span class="paginator-prev__text">什么是两阶段提交</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%9B%AE%E5%89%8D%E8%A1%8C%E4%B8%9A%E4%B8%ADCDC%E8%83%8C%E6%99%AF"><span class="toc-text">
+          1. 目前行业中CDC背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AF-Flink-SQL-CDC-Connectors"><span class="toc-text">
+          2. 什么是 Flink SQL CDC Connectors</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Flink-SQL-CDC%E5%8E%9F%E7%90%86%E4%BB%8B%E7%BB%8D"><span class="toc-text">
+          3. Flink SQL CDC原理介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%89%E7%A7%8D%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88%E7%9A%84%E5%88%86%E6%9E%90"><span class="toc-text">
+          4. 三种数据同步方案的分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E6%96%B9%E6%A1%88%E4%B8%80%EF%BC%9ADebezium-Kafka-%E8%AE%A1%E7%AE%97%E7%A8%8B%E5%BA%8F-%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F"><span class="toc-text">
+          4.1 方案一：Debezium+Kafka+计算程序+存储系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E6%96%B9%E6%A1%88%E4%BA%8C%EF%BC%9ADebezium-Kafka-Flink-SQL-%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F"><span class="toc-text">
+          4.2 方案二：Debezium+Kafka+Flink SQL+存储系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E6%96%B9%E6%A1%88%E4%B8%89%EF%BC%9AFlink-SQL-CDC-JDBC-Connector"><span class="toc-text">
+          4.3 方案三：Flink SQL CDC + JDBC Connector</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Flink-SQL-CDC-JDBC-Connector%E5%90%8C%E6%AD%A5%E6%96%B9%E6%A1%88%E9%AA%8C%E8%AF%81"><span class="toc-text">
+          5. Flink SQL CDC + JDBC Connector同步方案验证</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83%E5%92%8Csql%E8%84%9A%E6%9C%AC"><span class="toc-text">
+          5.1 测试环境和sql脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E6%B5%8B%E8%AF%95%E7%BB%93%E8%AE%BA"><span class="toc-text">
+          5.2 测试结论</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-1-%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          5.2.1  功能测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-2-%E5%BC%82%E5%B8%B8%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          5.2.2 异常测试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%B8%E8%A7%84%E5%8A%9F%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          常规功能测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link"><span class="toc-text"></span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E-DNS-%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E5%88%87%E6%8D%A2%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          基于 DNS 的数据库切换测试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Flink-%E9%AB%98%E5%8F%AF%E7%94%A8%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          Flink 高可用测试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-3-%E6%80%A7%E8%83%BD%E6%B5%8B%E8%AF%95"><span class="toc-text">
+          5.2.3 性能测试</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-Flink-SQL-CDC-JDBC-Connector%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%B8%80%E8%87%B4%E6%80%A7%E5%88%86%E6%9E%90"><span class="toc-text">
+          6. Flink SQL CDC + JDBC Connector端到端一致性分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%B8%80%E8%87%B4%E6%80%A7%E5%AE%9E%E7%8E%B0%E6%9D%A1%E4%BB%B6"><span class="toc-text">
+          6.1 端到端一致性实现条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-Flink-SQL-CDC-%E7%9A%84%E4%B8%80%E8%87%B4%E6%80%A7%E4%BF%9D%E8%AF%81"><span class="toc-text">
+          6.2 Flink SQL CDC 的一致性保证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-1-JDBC-Sink-Connector-%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">
+          6.2.1 JDBC Sink Connector 如何保证一致性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#-1"><span class="toc-text">
+          </span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-2-Flink-SQL-CDC-JDBC-Sink-Connector-%E7%BB%84%E5%90%88%E5%90%8E%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-text">
+          6.2.2 Flink SQL CDC + JDBC Sink Connector 组合后如何保证一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Debezium-Source-%E5%AF%B9-MySQL-%E8%BF%9B%E8%A1%8C-Snapshot-%E6%97%B6%E5%8F%91%E7%94%9F%E5%BC%82%E5%B8%B8"><span class="toc-text">
+          Debezium Source 对 MySQL 进行 Snapshot 时发生异常</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E6%80%BB%E7%BB%93"><span class="toc-text">
+          6.3 总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-Flink-SQL-CDC%E7%9B%AE%E5%89%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="toc-text">
+          7. Flink SQL CDC目前存在的缺陷</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">12</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">3</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">7</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>
