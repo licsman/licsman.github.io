@@ -8,7 +8,7 @@
 <meta property="og:image" content="https://licsman.github.io/images/image-20210322181006944.png">
 <meta property="og:image" content="https://licsman.github.io/images/image-20210322181535098.png">
 <meta property="article:published_time" content="2021-03-22T09:47:38.000Z">
-<meta property="article:modified_time" content="2021-03-22T10:27:12.335Z">
+<meta property="article:modified_time" content="2021-03-22T10:45:03.926Z">
 <meta property="article:author" content="Jiawei Miao">
 <meta property="article:tag" content="spark">
 <meta name="twitter:card" content="summary">
@@ -91,7 +91,7 @@ window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></he
       <p>从上面的源码可以看出，如果使用coalesce方法进行增加分区，将不会生效。我们可以尝试通过coalesce来增加分区的数量，观察一下具体结果：</p>
 <figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numsDF3 = numsDF.coalesce(<span class="number">6</span>)</span><br><span class="line">numsDF3: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [num: int]</span><br><span class="line"></span><br><span class="line">scala&gt; numsDF3.rdd.partitions.size</span><br><span class="line">res16: <span class="type">Int</span> = <span class="number">4</span></span><br></pre></td></tr></table></div></figure>
 
-<p>可以看出，即使我们尝试使用coalesce(6)来创建6个分区，numsDF3的分区数依然是4，并没有发生变化。**coalesce算法通过将数据从某些分区移动到现有分区来更改节点数，该方法显然用户增加分区数。</p>
+<p>可以看出，即使我们尝试使用coalesce(6)来创建6个分区，numsDF3的分区数依然是4，并没有发生变化，coalesce算法通过将数据从某些分区移动到现有分区来更改分区数，该方法显然不能增加分区数。</p>
 
         <h2 id="3-repartition操作"   >
           <a href="#3-repartition操作" class="heading-link"><i class="fas fa-link"></i></a>3. repartition操作</h2>
