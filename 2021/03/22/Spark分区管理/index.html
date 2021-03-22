@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="Spark分区管理的方式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark分区管理">
+<meta property="og:url" content="https://licsman.github.io/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="Spark分区管理的方式">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210322181006944.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210322181535098.png">
+<meta property="article:published_time" content="2021-03-22T09:47:38.000Z">
+<meta property="article:modified_time" content="2021-03-22T10:27:12.335Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="spark">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/image-20210322181006944.png"><title>Spark分区管理 | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Spark分区管理</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-22</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-22</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">2.3k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">14分</span></span></div></header><div class="post-body"><p>当我们使用Spark加载数据源并进行一些列转换时，Spark会将数据拆分为多个分区Partition，并在分区上并行执行计算。所以理解Spark是如何对数据进行分区的以及何时需要手动调整Spark的分区，可以帮助我们提升Spark程序的运行效率。</p>
+<a id="more"></a>
+
+
+        <h2 id="1-什么是分区"   >
+          <a href="#1-什么是分区" class="heading-link"><i class="fas fa-link"></i></a>1. 什么是分区</h2>
+      <p>关于什么是分区，其实没有什么神秘的。我们可以通过创建一个DataFrame来说明如何对数据进行分区：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> x = (<span class="number">1</span> to <span class="number">10</span>).toList</span><br><span class="line">x: <span class="type">List</span>[<span class="type">Int</span>] = <span class="type">List</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>)</span><br><span class="line">scala&gt; <span class="keyword">val</span> numsDF = x.toDF(<span class="string">&quot;num&quot;</span>)</span><br><span class="line">numsDF: org.apache.spark.sql.<span class="type">DataFrame</span> = [num: int]</span><br></pre></td></tr></table></div></figure>
+
+<p>创建好DataFrame之后，我们再来看一下该DataFame的分区，可以看出分区数为4：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; numsDF.rdd.partitions.size</span><br><span class="line">res0: <span class="type">Int</span> = <span class="number">4</span></span><br></pre></td></tr></table></div></figure>
+
+<p>当我们将DataFrame写入磁盘文件时，再来观察一下文件的个数，</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; numsDF.write.csv(<span class="string">&quot;file:///opt/modules/data/numsDF&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+<p>可以发现，上述的写入操作会生成4个文件</p>
+<p><img src="/images/image-20210322181006944.png" alt="image-20210322181006944"></p>
+
+        <h2 id="2-coalesce操作"   >
+          <a href="#2-coalesce操作" class="heading-link"><i class="fas fa-link"></i></a>2. coalesce操作</h2>
+      
+        <h3 id="源码"   >
+          <a href="#源码" class="heading-link"><i class="fas fa-link"></i></a>源码</h3>
+      <figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">coalesce</span></span>(numPartitions: <span class="type">Int</span>): <span class="type">Dataset</span>[<span class="type">T</span>] = withTypedPlan &#123;</span><br><span class="line">    <span class="type">Repartition</span>(numPartitions, shuffle = <span class="literal">false</span>, planWithBarrier)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="解释"   >
+          <a href="#解释" class="heading-link"><i class="fas fa-link"></i></a>解释</h3>
+      <p>在减少分区时，返回一个新的分区数为指定<code>numPartitions</code>的DataSet，在增大分区时，则分区数保持不变。值得注意的是，该操作生成的是窄依赖，<strong>所以不会发生shuffle</strong>。然而，如果是极端的操作，比如numPartitions = 1，这样会导致只在一个节点进行计算。为了避免这种情况发生，可以使用repartition方法，<strong>该方法会发生shuffle操作</strong>，这就意味着当前的上游分区可以并行执行</p>
+
+        <h3 id="示例"   >
+          <a href="#示例" class="heading-link"><i class="fas fa-link"></i></a>示例</h3>
+      
+        <h4 id="减少分区操作"   >
+          <a href="#减少分区操作" class="heading-link"><i class="fas fa-link"></i></a>减少分区操作</h4>
+      <p>coalesce方法可以用来减少DataFrame的分区数。以下操作是将数据合并到两个分区：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numsDF2 = numsDF.coalesce(<span class="number">2</span>)</span><br><span class="line">numsDF2: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [num: int]</span><br></pre></td></tr></table></div></figure>
+
+<p>我们可以验证上述操作是否创建了只有两个分区的新DataFrame：可以看出，分区数变为了2</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; numsDF2.rdd.partitions.size </span><br><span class="line">res13: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></div></figure>
+
+<p>将numsDF2写入文件存储，观察文件数量</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">numsDF2.write.csv(<span class="string">&quot;file:///opt/modules/data/numsDF2&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+<p>可以发现，上述的写入操作会生成2个文件</p>
+<p><img src="/images/image-20210322181535098.png" alt="image-20210322181535098"></p>
+<p>上述每个分区的数据如下：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">part<span class="number">-00000</span>: <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span></span><br><span class="line">part<span class="number">-00001</span>: <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span></span><br></pre></td></tr></table></div></figure>
+
+<p>对比减少分区之前的数据存储，可以看出：在减少分区时，并没有对所有数据进行了移动，仅仅是在原来分区的基础之上进行了合并而已，这样的操作可以减少数据的移动，所以效率较高。</p>
+
+        <h4 id="增加分区操作"   >
+          <a href="#增加分区操作" class="heading-link"><i class="fas fa-link"></i></a>增加分区操作</h4>
+      <p>从上面的源码可以看出，如果使用coalesce方法进行增加分区，将不会生效。我们可以尝试通过coalesce来增加分区的数量，观察一下具体结果：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numsDF3 = numsDF.coalesce(<span class="number">6</span>)</span><br><span class="line">numsDF3: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [num: int]</span><br><span class="line"></span><br><span class="line">scala&gt; numsDF3.rdd.partitions.size</span><br><span class="line">res16: <span class="type">Int</span> = <span class="number">4</span></span><br></pre></td></tr></table></div></figure>
+
+<p>可以看出，即使我们尝试使用coalesce(6)来创建6个分区，numsDF3的分区数依然是4，并没有发生变化。**coalesce算法通过将数据从某些分区移动到现有分区来更改节点数，该方法显然用户增加分区数。</p>
+
+        <h2 id="3-repartition操作"   >
+          <a href="#3-repartition操作" class="heading-link"><i class="fas fa-link"></i></a>3. repartition操作</h2>
+      
+        <h3 id="源码-1"   >
+          <a href="#源码-1" class="heading-link"><i class="fas fa-link"></i></a>源码</h3>
+      <figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 返回一个分区数为`numPartitions`的新的DataSet</span></span><br><span class="line"><span class="comment"> * @group typedrel</span></span><br><span class="line"><span class="comment"> * @since 1.6.0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">repartition</span></span>(numPartitions: <span class="type">Int</span>): <span class="type">Dataset</span>[<span class="type">T</span>] = withTypedPlan &#123;</span><br><span class="line">  <span class="type">Repartition</span>(numPartitions, shuffle = <span class="literal">true</span>, planWithBarrier)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<p>从源码中可以看出，该方法可以用于减少或者增加分区的数量，并且会发生Shuffle操作。</p>
+
+        <h3 id="示例-1"   >
+          <a href="#示例-1" class="heading-link"><i class="fas fa-link"></i></a>示例</h3>
+      
+        <h4 id="减少分区操作-1"   >
+          <a href="#减少分区操作-1" class="heading-link"><i class="fas fa-link"></i></a>减少分区操作</h4>
+      <p>已知numsDF有4个分区，现在将其分区置为2，观察结果</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numsDF4 = numsDF.repartition(<span class="number">2</span>)</span><br><span class="line">numsDF4: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [num: int]</span><br><span class="line">scala&gt; numsDF4.rdd.partitions.size</span><br><span class="line">res19: <span class="type">Int</span> = <span class="number">2</span></span><br></pre></td></tr></table></div></figure>
+
+<p>可以看出，分区确实减少了，我们在来看一下每个分区的数据：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">numsDF4.write.csv(<span class="string">&quot;file:///opt/modules/data/numsDF4&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+<p>上面的操作会产生两个文件，每个分区文件的数据为：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">part<span class="number">-00000</span>:<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">7</span>,<span class="number">10</span>,<span class="number">9</span></span><br><span class="line">part<span class="number">-00000</span>:<span class="number">1</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">8</span></span><br></pre></td></tr></table></div></figure>
+
+<p>从上面的数据分布可以看出，数据被Shuffle了。这也印证了源码中说的，repartition操作会将所有数据进行Shuffle，并且将数据均匀地分布在不同的分区上，并不是像coalesce方法一样，会尽量减少数据的移动。</p>
+
+        <h4 id="增加分区操作-1"   >
+          <a href="#增加分区操作-1" class="heading-link"><i class="fas fa-link"></i></a>增加分区操作</h4>
+      <p>repartition操作方法不仅可以用于减少分区操作，也可以用于增加分区数量。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> numsDF5 = numsDF.repartition(<span class="number">6</span>)</span><br><span class="line">numsDF5: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [num: int]</span><br><span class="line">scala&gt; numsDF5.rdd.partitions.size</span><br><span class="line">res22: <span class="type">Int</span> = <span class="number">6</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="coalesce-与repartition之间的区别"   >
+          <a href="#coalesce-与repartition之间的区别" class="heading-link"><i class="fas fa-link"></i></a>coalesce 与repartition之间的区别</h3>
+      <p>repartition算法对数据进行了Shuffle操作，并创建了大小相等的数据分区。coalesce操作合并现有分区以避免Shuffle。除此之外，coalesce操作仅能用于减少分区，不能用于增加分区操作。</p>
+
+        <h3 id="按照列字段进行repartition"   >
+          <a href="#按照列字段进行repartition" class="heading-link"><i class="fas fa-link"></i></a>按照列字段进行repartition</h3>
+      <ul>
+<li>源码</li>
+</ul>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">repartition</span></span>(partitionExprs: <span class="type">Column</span>*): <span class="type">Dataset</span>[<span class="type">T</span>] = &#123;</span><br><span class="line">  repartition(sparkSession.sessionState.conf.numShufflePartitions, partitionExprs: _*)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<ul>
+<li>解释</li>
+</ul>
+<p>返回一个按照指定分区列的新的DataSet，<strong>具体的分区数量有参数<code>spark.sql.shuffle.partitions</code>默认指定，该默认值为200</strong>，该操作与HiveSQL的DISTRIBUTE BY操作类似。</p>
+<p>repartition除了可以指定具体的分区数之外，还可以指定具体的分区字段。我们可以使用下面的示例来探究如何使用特定的列对DataFrame进行重新分区。</p>
+<p>首先创建DataFrame：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> people = <span class="type">List</span>(</span><br><span class="line">(<span class="string">&quot;jack&quot;</span>,<span class="string">&quot;male&quot;</span>),</span><br><span class="line">(<span class="string">&quot;Alice&quot;</span>,<span class="string">&quot;female&quot;</span>),</span><br><span class="line">(<span class="string">&quot;tom&quot;</span>,<span class="string">&quot;male&quot;</span>),</span><br><span class="line">(<span class="string">&quot;Angela&quot;</span>,<span class="string">&quot;female&quot;</span>),</span><br><span class="line">(<span class="string">&quot;tony&quot;</span>,<span class="string">&quot;male&quot;</span>)</span><br><span class="line">)</span><br><span class="line"><span class="keyword">val</span> peopleDF = people.toDF(<span class="string">&quot;name&quot;</span>,<span class="string">&quot;gender&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+<p>让我们按gender列对DataFrame进行分区：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> genderDF = peopleDF.repartition($<span class="string">&quot;gender&quot;</span>)</span><br><span class="line">genderDF: org.apache.spark.sql.<span class="type">Dataset</span>[org.apache.spark.sql.<span class="type">Row</span>] = [name: string, gender: string]</span><br></pre></td></tr></table></div></figure>
+
+<p>按列进行分区时，Spark默认会创建200个分区。此示例将有两个带有数据的分区,其他分区将没有数据。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scala&gt; genderDF.rdd.partitions.size</span><br><span class="line">res23: <span class="type">Int</span> = <span class="number">200</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h2 id="4-重点"   >
+          <a href="#4-重点" class="heading-link"><i class="fas fa-link"></i></a>4. 重点</h2>
+      
+        <h3 id="合理设置分区数量"   >
+          <a href="#合理设置分区数量" class="heading-link"><i class="fas fa-link"></i></a>合理设置分区数量</h3>
+      <p>假设我们要对一个大数据集进行操作，该数据集的分区数也比较大，那么当我们进行一些操作之后，比如filter过滤操作、sample采样操作，这些操作可能会使结果数据集的数据量大量减少。但是Spark却不会对其分区进行调整，由此会造成大量的分区没有数据，并且向HDFS读取和写入大量的空文件，效率会很低，这种情况就需要我们重新调整分数数量，以此来提升效率。</p>
+<p>通常情况下，结果集的数据量减少时，其对应的分区数也应当相应地减少。那么该如何确定具体的分区数呢？</p>
+<ul>
+<li><strong>分区过少</strong>：将无法充分利用群集中的所有可用的CPU core</li>
+<li><strong>分区过多</strong>：产生非常多的小任务，从而会产生过多的开销</li>
+</ul>
+<p>在这两者之间，第一个对性能的影响相对比较大。对于小于1000个分区数的情况而言，调度太多的小任务所产生的影响相对较小。但是，如果有成千上万个分区，那么Spark会变得非常慢。</p>
+<p>spark中的shuffle分区数是静态的。它不会随着不同的数据大小而变化。上文提到：默认情况下，控制shuffle分区数的参数<strong>spark.sql.shuffle.partitions</strong>值为<strong>200</strong>，这将导致以下问题</p>
+<ul>
+<li>对于较小的数据，200是一个过大的选择，由于调度开销，通常会导致处理速度变慢。</li>
+<li>对于大数据，200很小，无法有效使用群集中的所有资源</li>
+</ul>
+<p>一般情况下，我们可以通过将集群中的CPU数量乘以2、3或4来确定分区的数量。如果要将数据写出到文件系统中，则可以选择一个分区大小，以创建合理大小的文件。</p>
+<p><strong>该使用哪种方法进行重分区呢？</strong></p>
+<p>对于大型数据集，进行Shuffle操作是很消耗性能的，但是当我们的数据集比较小的时候，可以使用repartition方法进行重分区，这样可以尽量保证每个分区的数据分布比较均匀(使用coalesce可能会造成数据倾斜)，对于下游使用者来说效率更高。</p>
+
+        <h3 id="如何将数据写入到单个文件"   >
+          <a href="#如何将数据写入到单个文件" class="heading-link"><i class="fas fa-link"></i></a>如何将数据写入到单个文件</h3>
+      <p>通过使用repartition(1)和coalesce(1))可用于将DataFrame写入到单个文件中。通常情况下，不会只将数据写入到单个文件中，因为这样效率很低，写入速度很慢，在数据量比较大的情况，很可能会出现写入错误的情况。所以，只有当DataFrame很小时，我们才会考虑将其写入到单个文件中。</p>
+
+        <h3 id="何时考虑重分区"   >
+          <a href="#何时考虑重分区" class="heading-link"><i class="fas fa-link"></i></a>何时考虑重分区</h3>
+      <p>一般对于在对比较大的数据集进行过滤操作之后，产生的较小数据集，通常需要对其考虑进行重分区，从而提升任务执行的效率。</p>
+
+        <h2 id="5-总结"   >
+          <a href="#5-总结" class="heading-link"><i class="fas fa-link"></i></a>5. 总结</h2>
+      <p>本文主要介绍了Spark是如何管理分区的，分别解释了Spark提供的两种分区方法，并给出了相应的使用示例和分析。最后对分区情况及其影响进行了讨论，并给出了一些实践的建议。希望本文对你有所帮助。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/">https://licsman.github.io/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/spark/">spark</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF%5BDebezium%5D/"><span class="paginator-prev__text">你必须Get的开源CDC技术[Debezium]</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%88%86%E5%8C%BA"><span class="toc-text">
+          1. 什么是分区</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-coalesce%E6%93%8D%E4%BD%9C"><span class="toc-text">
+          2. coalesce操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%90%E7%A0%81"><span class="toc-text">
+          源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E9%87%8A"><span class="toc-text">
+          解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-text">
+          示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%8F%E5%B0%91%E5%88%86%E5%8C%BA%E6%93%8D%E4%BD%9C"><span class="toc-text">
+          减少分区操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E5%88%86%E5%8C%BA%E6%93%8D%E4%BD%9C"><span class="toc-text">
+          增加分区操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-repartition%E6%93%8D%E4%BD%9C"><span class="toc-text">
+          3. repartition操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BA%90%E7%A0%81-1"><span class="toc-text">
+          源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B-1"><span class="toc-text">
+          示例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%87%8F%E5%B0%91%E5%88%86%E5%8C%BA%E6%93%8D%E4%BD%9C-1"><span class="toc-text">
+          减少分区操作</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E5%88%86%E5%8C%BA%E6%93%8D%E4%BD%9C-1"><span class="toc-text">
+          增加分区操作</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#coalesce-%E4%B8%8Erepartition%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">
+          coalesce 与repartition之间的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%89%E7%85%A7%E5%88%97%E5%AD%97%E6%AE%B5%E8%BF%9B%E8%A1%8Crepartition"><span class="toc-text">
+          按照列字段进行repartition</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E9%87%8D%E7%82%B9"><span class="toc-text">
+          4. 重点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%88%E7%90%86%E8%AE%BE%E7%BD%AE%E5%88%86%E5%8C%BA%E6%95%B0%E9%87%8F"><span class="toc-text">
+          合理设置分区数量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%B0%86%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5%E5%88%B0%E5%8D%95%E4%B8%AA%E6%96%87%E4%BB%B6"><span class="toc-text">
+          如何将数据写入到单个文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%95%E6%97%B6%E8%80%83%E8%99%91%E9%87%8D%E5%88%86%E5%8C%BA"><span class="toc-text">
+          何时考虑重分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93"><span class="toc-text">
+          5. 总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">15</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">4</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">9</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>
