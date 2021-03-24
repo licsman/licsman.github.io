@@ -1,0 +1,479 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="description" content="Flink流和批常用到的算子">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink常用算子">
+<meta property="og:url" content="https://licsman.github.io/2021/03/24/Flink%E5%B8%B8%E7%94%A8%E7%AE%97%E5%AD%90/index.html">
+<meta property="og:site_name" content="Jiawei&#39;s Blog">
+<meta property="og:description" content="Flink流和批常用到的算子">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210324183637011.png">
+<meta property="og:image" content="https://licsman.github.io/images/image-20210324183720691.png">
+<meta property="article:published_time" content="2021-03-24T10:26:44.000Z">
+<meta property="article:modified_time" content="2021-03-24T10:53:26.363Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://licsman.github.io/images/navbar-brand-logo.jpg"><title>Flink常用算子 | Jiawei's Blog</title><link ref="canonical" href="https://licsman.github.io/2021/03/24/Flink%E5%B8%B8%E7%94%A8%E7%AE%97%E5%AD%90/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: undefined,
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">Jiawei's Blog</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Flink常用算子</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-24</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-24</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">4k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">32分</span></span></div></header><div class="post-body"><p><img src="/images/navbar-brand-logo.jpg" alt="img"></p>
+<p>Flink和Spark类似，也是一种一站式处理的框架；既可以进行批处理（DataSet），也可以进行实时处理（DataStream）。</p>
+<p>所以下面将Flink的算子分为两大类：DataSet和DataStream，下面将对这两大类的API以及用法展开分析：</p>
+<a id="more"></a>
+
+
+        <h1 id="DataSet"   >
+          <a href="#DataSet" class="heading-link"><i class="fas fa-link"></i></a>DataSet</h1>
+      
+        <h2 id="Source算子"   >
+          <a href="#Source算子" class="heading-link"><i class="fas fa-link"></i></a>Source算子</h2>
+      
+        <h3 id="1-fromCollection"   >
+          <a href="#1-fromCollection" class="heading-link"><i class="fas fa-link"></i></a>1. fromCollection</h3>
+      <p>fromCollection：从本地集合读取数据</p>
+<p>例：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> env = <span class="type">ExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line"><span class="keyword">val</span> textDataSet: <span class="type">DataSet</span>[<span class="type">String</span>] = env.fromCollection(</span><br><span class="line">  <span class="type">List</span>(<span class="string">&quot;1,张三&quot;</span>, <span class="string">&quot;2,李四&quot;</span>, <span class="string">&quot;3,王五&quot;</span>, <span class="string">&quot;4,赵六&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="2-readTextFile"   >
+          <a href="#2-readTextFile" class="heading-link"><i class="fas fa-link"></i></a>2. readTextFile</h3>
+      <p>readTextFile：从文件中读取：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> textDataSet: <span class="type">DataSet</span>[<span class="type">String</span>]  = env.readTextFile(<span class="string">&quot;/data/a.txt&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="3-readTextFile：遍历目录"   >
+          <a href="#3-readTextFile：遍历目录" class="heading-link"><i class="fas fa-link"></i></a>3. readTextFile：遍历目录</h3>
+      <p>readTextFile可以对一个文件目录内的所有文件，包括所有子目录中的所有文件的遍历访问方式：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> parameters = <span class="keyword">new</span> <span class="type">Configuration</span></span><br><span class="line"><span class="comment">// recursive.file.enumeration 开启递归</span></span><br><span class="line">parameters.setBoolean(<span class="string">&quot;recursive.file.enumeration&quot;</span>, <span class="literal">true</span>)</span><br><span class="line"><span class="keyword">val</span> file = env.readTextFile(<span class="string">&quot;/data&quot;</span>).withParameters(parameters)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="4-readTextFile：读取压缩文件"   >
+          <a href="#4-readTextFile：读取压缩文件" class="heading-link"><i class="fas fa-link"></i></a>4. readTextFile：读取压缩文件</h3>
+      <p>对于以下压缩类型，不需要指定任何额外的inputformat方法，flink可以自动识别并且解压。但是，压缩文件可能不会并行读取，可能是顺序读取的，这样可能会影响作业的可伸缩性。</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th align="center">压缩方法</th>
+<th align="center">文件扩展名</th>
+<th align="center">是否可并行读取</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">DEFLATE</td>
+<td align="center">.deflate</td>
+<td align="center">no</td>
+</tr>
+<tr>
+<td align="center">GZip</td>
+<td align="center">.gz .gzip</td>
+<td align="center">no</td>
+</tr>
+<tr>
+<td align="center">Bzip2</td>
+<td align="center">.bz2</td>
+<td align="center">no</td>
+</tr>
+<tr>
+<td align="center">XZ</td>
+<td align="center">.xz</td>
+<td align="center">no</td>
+</tr>
+</tbody></table></div>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> file = env.readTextFile(<span class="string">&quot;/data/file.gz&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="Transform转换算子"   >
+          <a href="#Transform转换算子" class="heading-link"><i class="fas fa-link"></i></a>Transform转换算子</h2>
+      <p>因为Transform算子基于Source算子操作，所以首先构建Flink执行环境及Source算子，后续Transform算子操作基于此：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> env = <span class="type">ExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line"><span class="keyword">val</span> textDataSet: <span class="type">DataSet</span>[<span class="type">String</span>] = env.fromCollection(</span><br><span class="line">  <span class="type">List</span>(<span class="string">&quot;张三,1&quot;</span>, <span class="string">&quot;李四,2&quot;</span>, <span class="string">&quot;王五,3&quot;</span>, <span class="string">&quot;张三,4&quot;</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="1-map"   >
+          <a href="#1-map" class="heading-link"><i class="fas fa-link"></i></a>1. map</h3>
+      <p>将DataSet中的每一个元素转换为另外一个元素：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用map将List转换为一个Scala的样例类</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span>(<span class="params">name: <span class="type">String</span>, id: <span class="type">String</span></span>)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">userDataSet</span></span>: <span class="type">DataSet</span>[<span class="type">User</span>] = textDataSet.map &#123;</span><br><span class="line">  text =&gt;</span><br><span class="line">    <span class="keyword">val</span> fieldArr = text.split(<span class="string">&quot;,&quot;</span>)</span><br><span class="line">    <span class="type">User</span>(fieldArr(<span class="number">0</span>), fieldArr(<span class="number">1</span>))</span><br><span class="line">&#125;</span><br><span class="line">userDataSet.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="2-flatMap"   >
+          <a href="#2-flatMap" class="heading-link"><i class="fas fa-link"></i></a>2. flatMap</h3>
+      <p>将DataSet中的每一个元素转换为0…n个元素：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用flatMap操作，将集合中的数据：</span></span><br><span class="line"><span class="comment">// 根据第一个元素，进行分组</span></span><br><span class="line"><span class="comment">// 根据第二个元素，进行聚合求值 </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> result = textDataSet.flatMap(line =&gt; line)</span><br><span class="line">      .groupBy(<span class="number">0</span>) <span class="comment">// 根据第一个元素，进行分组</span></span><br><span class="line">      .sum(<span class="number">1</span>) <span class="comment">// 根据第二个元素，进行聚合求值</span></span><br><span class="line">      </span><br><span class="line">result.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="3-mapPartition"   >
+          <a href="#3-mapPartition" class="heading-link"><i class="fas fa-link"></i></a>3. mapPartition</h3>
+      <p>将一个分区中的元素转换为另一个元素：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用mapPartition操作，将List转换为一个scala的样例类</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span>(<span class="params">name: <span class="type">String</span>, id: <span class="type">String</span></span>)</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">result</span></span>: <span class="type">DataSet</span>[<span class="type">User</span>] = textDataSet.mapPartition(line =&gt; &#123;</span><br><span class="line">      line.map(index =&gt; <span class="type">User</span>(index._1, index._2))</span><br><span class="line">    &#125;)</span><br><span class="line">    </span><br><span class="line">result.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="4-filter"   >
+          <a href="#4-filter" class="heading-link"><i class="fas fa-link"></i></a>4. filter</h3>
+      <p>过滤出来一些符合条件的元素，返回<strong>boolean值为true</strong>的元素：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> source: <span class="type">DataSet</span>[<span class="type">String</span>] = env.fromElements(<span class="string">&quot;java&quot;</span>, <span class="string">&quot;scala&quot;</span>, <span class="string">&quot;java&quot;</span>)</span><br><span class="line"><span class="keyword">val</span> filter:<span class="type">DataSet</span>[<span class="type">String</span>] = source.filter(line =&gt; line.contains(<span class="string">&quot;java&quot;</span>))<span class="comment">//过滤出带java的数据</span></span><br><span class="line">filter.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="5-reduce"   >
+          <a href="#5-reduce" class="heading-link"><i class="fas fa-link"></i></a>5. reduce</h3>
+      <p>可以对一个dataset或者一个group来进行聚合计算，最终<strong>聚合成一个元素：</strong></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用 fromElements 构建数据源</span></span><br><span class="line"><span class="keyword">val</span> source = env.fromElements((<span class="string">&quot;java&quot;</span>, <span class="number">1</span>), (<span class="string">&quot;scala&quot;</span>, <span class="number">1</span>), (<span class="string">&quot;java&quot;</span>, <span class="number">1</span>))</span><br><span class="line"><span class="comment">// 使用map转换成DataSet元组</span></span><br><span class="line"><span class="keyword">val</span> mapData: <span class="type">DataSet</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = source.map(line =&gt; line)</span><br><span class="line"><span class="comment">// 根据首个元素分组</span></span><br><span class="line"><span class="keyword">val</span> groupData = mapData.groupBy(_._1)</span><br><span class="line"><span class="comment">// 使用reduce聚合</span></span><br><span class="line"><span class="keyword">val</span> reduceData = groupData.reduce((x, y) =&gt; (x._1, x._2 + y._2))</span><br><span class="line"><span class="comment">// 打印测试</span></span><br><span class="line">reduceData.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="6-reduceGroup"   >
+          <a href="#6-reduceGroup" class="heading-link"><i class="fas fa-link"></i></a>6. reduceGroup</h3>
+      <p>将一个dataset或者一个group<strong>聚合成一个或多个元素</strong>。<br>reduceGroup是reduce的一种优化方案；<br>它会先分组reduce，然后在做整体的reduce；这样做的好处就是可以减少网络IO：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用 fromElements 构建数据源</span></span><br><span class="line"><span class="keyword">val</span> source: <span class="type">DataSet</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = env.fromElements((<span class="string">&quot;java&quot;</span>, <span class="number">1</span>), (<span class="string">&quot;scala&quot;</span>, <span class="number">1</span>), (<span class="string">&quot;java&quot;</span>, <span class="number">1</span>))</span><br><span class="line"><span class="comment">// 根据首个元素分组</span></span><br><span class="line"><span class="keyword">val</span> groupData = source.groupBy(_._1)</span><br><span class="line"><span class="comment">// 使用reduceGroup聚合</span></span><br><span class="line"><span class="keyword">val</span> result: <span class="type">DataSet</span>[(<span class="type">String</span>, <span class="type">Int</span>)] = groupData.reduceGroup &#123;</span><br><span class="line">      (in: <span class="type">Iterator</span>[(<span class="type">String</span>, <span class="type">Int</span>)], out: <span class="type">Collector</span>[(<span class="type">String</span>, <span class="type">Int</span>)]) =&gt;</span><br><span class="line">        <span class="keyword">val</span> tuple = in.reduce((x, y) =&gt; (x._1, x._2 + y._2))</span><br><span class="line">        out.collect(tuple)</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// 打印测试</span></span><br><span class="line">result.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="7-minBy和maxBy"   >
+          <a href="#7-minBy和maxBy" class="heading-link"><i class="fas fa-link"></i></a>7. minBy和maxBy</h3>
+      <p>选择具有最小值或最大值的<strong>元素：</strong></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用minBy操作，求List中每个人的最小值</span></span><br><span class="line"><span class="comment">// List(&quot;张三,1&quot;, &quot;李四,2&quot;, &quot;王五,3&quot;, &quot;张三,4&quot;)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span>(<span class="params">name: <span class="type">String</span>, id: <span class="type">String</span></span>)</span></span><br><span class="line"><span class="class"><span class="title">//</span> <span class="title">将List转换为一个scala的样例类</span></span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">text</span></span>: <span class="type">DataSet</span>[<span class="type">User</span>] = textDataSet.mapPartition(line =&gt; &#123;</span><br><span class="line">      line.map(index =&gt; <span class="type">User</span>(index._1, index._2))</span><br><span class="line">    &#125;)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">val</span> result = text</span><br><span class="line">          .groupBy(<span class="number">0</span>) <span class="comment">// 按照姓名分组</span></span><br><span class="line">          .minBy(<span class="number">1</span>)   <span class="comment">// 每个人的最小值</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="8-Aggregate"   >
+          <a href="#8-Aggregate" class="heading-link"><i class="fas fa-link"></i></a>8. Aggregate</h3>
+      <p>在数据集上进行聚合求<strong>最值</strong>（最大值、最小值）：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="keyword">new</span> mutable.<span class="type">MutableList</span>[(<span class="type">Int</span>, <span class="type">String</span>, <span class="type">Double</span>)]</span><br><span class="line">    data.+=((<span class="number">1</span>, <span class="string">&quot;yuwen&quot;</span>, <span class="number">89.0</span>))</span><br><span class="line">    data.+=((<span class="number">2</span>, <span class="string">&quot;shuxue&quot;</span>, <span class="number">92.2</span>))</span><br><span class="line">    data.+=((<span class="number">3</span>, <span class="string">&quot;yuwen&quot;</span>, <span class="number">89.99</span>))</span><br><span class="line"><span class="comment">// 使用 fromElements 构建数据源</span></span><br><span class="line"><span class="keyword">val</span> input: <span class="type">DataSet</span>[(<span class="type">Int</span>, <span class="type">String</span>, <span class="type">Double</span>)] = env.fromCollection(data)</span><br><span class="line"><span class="comment">// 使用group执行分组操作</span></span><br><span class="line"><span class="keyword">val</span> value = input.groupBy(<span class="number">1</span>)</span><br><span class="line">            <span class="comment">// 使用aggregate求最大值元素</span></span><br><span class="line">            .aggregate(<span class="type">Aggregations</span>.<span class="type">MAX</span>, <span class="number">2</span>) </span><br><span class="line"><span class="comment">// 打印测试</span></span><br><span class="line">value.print()       </span><br></pre></td></tr></table></div></figure>
+
+<p><strong>Aggregate只能作用于元组上</strong></p>
+<blockquote>
+<p>注意：<br>要使用aggregate，只能使用字段索引名或索引名称来进行分组 <code>groupBy(0)</code> ，否则会报一下错误:<br>Exception in thread “main” java.lang.UnsupportedOperationException: Aggregate does not support grouping with KeySelector functions, yet.</p>
+</blockquote>
+
+        <h3 id="9-distinct"   >
+          <a href="#9-distinct" class="heading-link"><i class="fas fa-link"></i></a>9. distinct</h3>
+      <p>去除重复的数据：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数据源使用上一题的</span></span><br><span class="line"><span class="comment">// 使用distinct操作，根据科目去除集合中重复的元组数据</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> value: <span class="type">DataSet</span>[(<span class="type">Int</span>, <span class="type">String</span>, <span class="type">Double</span>)] = input.distinct(<span class="number">1</span>)</span><br><span class="line">value.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="10-first"   >
+          <a href="#10-first" class="heading-link"><i class="fas fa-link"></i></a>10. first</h3>
+      <p>取前N个数：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">input.first(<span class="number">2</span>) <span class="comment">// 取前两个数</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="11-join"   >
+          <a href="#11-join" class="heading-link"><i class="fas fa-link"></i></a>11. join</h3>
+      <p>将两个DataSet按照一定条件连接到一起，形成新的DataSet：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// s1 和 s2 数据集格式如下：</span></span><br><span class="line"><span class="comment">// DataSet[(Int, String,String, Double)]</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> joinData = s1.join(s2)  <span class="comment">// s1数据集 join s2数据集</span></span><br><span class="line">             .where(<span class="number">0</span>).equalTo(<span class="number">0</span>) &#123;     <span class="comment">// join的条件</span></span><br><span class="line">      (s1, s2) =&gt; (s1._1, s1._2, s2._2, s1._3)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="12-leftOuterJoin"   >
+          <a href="#12-leftOuterJoin" class="heading-link"><i class="fas fa-link"></i></a>12. leftOuterJoin</h3>
+      <p>左外连接,左边的Dataset中的每一个元素，去连接右边的元素</p>
+<p>此外还有：</p>
+<p>rightOuterJoin：右外连接,左边的Dataset中的每一个元素，去连接左边的元素</p>
+<p>fullOuterJoin：全外连接,左右两边的元素，全部连接</p>
+<p>下面以 leftOuterJoin 进行示例：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">val</span> data1 = <span class="type">ListBuffer</span>[<span class="type">Tuple2</span>[<span class="type">Int</span>,<span class="type">String</span>]]()</span><br><span class="line">    data1.append((<span class="number">1</span>,<span class="string">&quot;zhangsan&quot;</span>))</span><br><span class="line">    data1.append((<span class="number">2</span>,<span class="string">&quot;lisi&quot;</span>))</span><br><span class="line">    data1.append((<span class="number">3</span>,<span class="string">&quot;wangwu&quot;</span>))</span><br><span class="line">    data1.append((<span class="number">4</span>,<span class="string">&quot;zhaoliu&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> data2 = <span class="type">ListBuffer</span>[<span class="type">Tuple2</span>[<span class="type">Int</span>,<span class="type">String</span>]]()</span><br><span class="line">    data2.append((<span class="number">1</span>,<span class="string">&quot;beijing&quot;</span>))</span><br><span class="line">    data2.append((<span class="number">2</span>,<span class="string">&quot;shanghai&quot;</span>))</span><br><span class="line">    data2.append((<span class="number">4</span>,<span class="string">&quot;guangzhou&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> text1 = env.fromCollection(data1)</span><br><span class="line"><span class="keyword">val</span> text2 = env.fromCollection(data2)</span><br><span class="line"></span><br><span class="line">text1.leftOuterJoin(text2).where(<span class="number">0</span>).equalTo(<span class="number">0</span>).apply((first,second)=&gt;&#123;</span><br><span class="line">      <span class="keyword">if</span>(second==<span class="literal">null</span>)&#123;</span><br><span class="line">        (first._1,first._2,<span class="string">&quot;null&quot;</span>)</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        (first._1,first._2,second._2)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;).print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="13-cross"   >
+          <a href="#13-cross" class="heading-link"><i class="fas fa-link"></i></a>13. cross</h3>
+      <p>交叉操作，通过形成这个数据集和其他数据集的笛卡尔积，创建一个新的数据集</p>
+<p>和join类似，但是这种交叉操作会产生笛卡尔积，在<strong>数据比较大的时候，是非常消耗内存的操作：</strong></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> cross = input1.cross(input2)&#123;</span><br><span class="line">      (input1 , input2) =&gt; (input1._1,input1._2,input1._3,input2._2)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">cross.print()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="14-union"   >
+          <a href="#14-union" class="heading-link"><i class="fas fa-link"></i></a>14. union</h3>
+      <p>联合操作，创建包含来自该数据集和其他数据集的元素的新数据集,<strong>不会去重：</strong></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> unionData: <span class="type">DataSet</span>[<span class="type">String</span>] = elements1.union(elements2).union(elements3)</span><br><span class="line"><span class="comment">// 去除重复数据</span></span><br><span class="line"><span class="keyword">val</span> value = unionData.distinct(line =&gt; line)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="15-rebalance"   >
+          <a href="#15-rebalance" class="heading-link"><i class="fas fa-link"></i></a>15. rebalance</h3>
+      <p>Flink也有数据倾斜的时候，比如当前有数据量大概10亿条数据需要处理，在处理过程中可能会发生如图所示的状况：</p>
+<p><img src="/images/image-20210324183637011.png" alt="image-20210324183637011"></p>
+<p>这个时候本来总体数据量只需要10分钟解决的问题，出现了数据倾斜，机器1上的任务需要4个小时才能完成，那么其他3台机器执行完毕也要等待机器1执行完毕后才算整体将任务完成；所以在实际的工作中，出现这种情况比较好的解决方案就是接下来要介绍的—<strong>rebalance</strong>（内部使用round robin方法将数据均匀打散。这对于数据倾斜时是很好的选择。）</p>
+<p><img src="/images/image-20210324183720691.png" alt="image-20210324183720691"></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使用rebalance操作，避免数据倾斜</span></span><br><span class="line"><span class="keyword">val</span> rebalance = filterData.rebalance()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="16-partitionByHash"   >
+          <a href="#16-partitionByHash" class="heading-link"><i class="fas fa-link"></i></a>16. partitionByHash</h3>
+      <p>按照指定的key进行hash分区：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="keyword">new</span> mutable.<span class="type">MutableList</span>[(<span class="type">Int</span>, <span class="type">Long</span>, <span class="type">String</span>)]</span><br><span class="line">data.+=((<span class="number">1</span>, <span class="number">1</span>L, <span class="string">&quot;Hi&quot;</span>))</span><br><span class="line">data.+=((<span class="number">2</span>, <span class="number">2</span>L, <span class="string">&quot;Hello&quot;</span>))</span><br><span class="line">data.+=((<span class="number">3</span>, <span class="number">2</span>L, <span class="string">&quot;Hello world&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> collection = env.fromCollection(data)</span><br><span class="line"><span class="keyword">val</span> unique = collection.partitionByHash(<span class="number">1</span>).mapPartition&#123;</span><br><span class="line">  line =&gt;</span><br><span class="line">    line.map(x =&gt; (x._1 , x._2 , x._3))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">unique.writeAsText(<span class="string">&quot;hashPartition&quot;</span>, <span class="type">WriteMode</span>.<span class="type">NO_OVERWRITE</span>)</span><br><span class="line">env.execute()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="17-partitionByRange"   >
+          <a href="#17-partitionByRange" class="heading-link"><i class="fas fa-link"></i></a>17. partitionByRange</h3>
+      <p>根据指定的key对数据集进行范围分区：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="keyword">new</span> mutable.<span class="type">MutableList</span>[(<span class="type">Int</span>, <span class="type">Long</span>, <span class="type">String</span>)]</span><br><span class="line">data.+=((<span class="number">1</span>, <span class="number">1</span>L, <span class="string">&quot;Hi&quot;</span>))</span><br><span class="line">data.+=((<span class="number">2</span>, <span class="number">2</span>L, <span class="string">&quot;Hello&quot;</span>))</span><br><span class="line">data.+=((<span class="number">3</span>, <span class="number">2</span>L, <span class="string">&quot;Hello world&quot;</span>))</span><br><span class="line">data.+=((<span class="number">4</span>, <span class="number">3</span>L, <span class="string">&quot;Hello world, how are you?&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> collection = env.fromCollection(data)</span><br><span class="line"><span class="keyword">val</span> unique = collection.partitionByRange(x =&gt; x._1).mapPartition(line =&gt; line.map&#123;</span><br><span class="line">  x=&gt;</span><br><span class="line">    (x._1 , x._2 , x._3)</span><br><span class="line">&#125;)</span><br><span class="line">unique.writeAsText(<span class="string">&quot;rangePartition&quot;</span>, <span class="type">WriteMode</span>.<span class="type">OVERWRITE</span>)</span><br><span class="line">env.execute()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="18-sortPartition"   >
+          <a href="#18-sortPartition" class="heading-link"><i class="fas fa-link"></i></a>18. sortPartition</h3>
+      <p>根据指定的字段值进行分区的排序：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="keyword">new</span> mutable.<span class="type">MutableList</span>[(<span class="type">Int</span>, <span class="type">Long</span>, <span class="type">String</span>)]</span><br><span class="line">    data.+=((<span class="number">1</span>, <span class="number">1</span>L, <span class="string">&quot;Hi&quot;</span>))</span><br><span class="line">    data.+=((<span class="number">2</span>, <span class="number">2</span>L, <span class="string">&quot;Hello&quot;</span>))</span><br><span class="line">    data.+=((<span class="number">3</span>, <span class="number">2</span>L, <span class="string">&quot;Hello world&quot;</span>))</span><br><span class="line">    data.+=((<span class="number">4</span>, <span class="number">3</span>L, <span class="string">&quot;Hello world, how are you?&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> ds = env.fromCollection(data)</span><br><span class="line">    <span class="keyword">val</span> result = ds</span><br><span class="line">      .map &#123; x =&gt; x &#125;.setParallelism(<span class="number">2</span>)</span><br><span class="line">      .sortPartition(<span class="number">1</span>, <span class="type">Order</span>.<span class="type">DESCENDING</span>)<span class="comment">//第一个参数代表按照哪个字段进行分区</span></span><br><span class="line">      .mapPartition(line =&gt; line)</span><br><span class="line">      .collect()</span><br><span class="line"></span><br><span class="line">println(result)</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="Sink算子"   >
+          <a href="#Sink算子" class="heading-link"><i class="fas fa-link"></i></a>Sink算子</h2>
+      
+        <h3 id="1-collect"   >
+          <a href="#1-collect" class="heading-link"><i class="fas fa-link"></i></a>1. collect</h3>
+      <p>将数据输出到本地集合：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result.collect()</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="2-writeAsText"   >
+          <a href="#2-writeAsText" class="heading-link"><i class="fas fa-link"></i></a>2. writeAsText</h3>
+      <p>将数据输出到文件</p>
+<p>Flink支持多种存储设备上的文件，包括本地文件，hdfs文件等</p>
+<p>Flink支持多种文件的存储格式，包括text文件，CSV文件等</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将数据写入本地文件</span></span><br><span class="line">result.writeAsText(<span class="string">&quot;/data/a&quot;</span>, <span class="type">WriteMode</span>.<span class="type">OVERWRITE</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将数据写入HDFS</span></span><br><span class="line">result.writeAsText(<span class="string">&quot;hdfs://node01:9000/data/a&quot;</span>, <span class="type">WriteMode</span>.<span class="type">OVERWRITE</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h1 id="DataStream"   >
+          <a href="#DataStream" class="heading-link"><i class="fas fa-link"></i></a>DataStream</h1>
+      <p><strong>和DataSet一样，DataStream也包括一系列的Transformation操作。</strong></p>
+
+        <h2 id="Source算子-1"   >
+          <a href="#Source算子-1" class="heading-link"><i class="fas fa-link"></i></a>Source算子</h2>
+      <p>Flink可以使用 StreamExecutionEnvironment.addSource(source) 来为我们的程序添加数据来源。<br>Flink 已经提供了若干实现好了的 source functions，当然我们也可以通过实现 SourceFunction 来自定义非并行的source或者实现 ParallelSourceFunction 接口或者扩展 RichParallelSourceFunction 来自定义并行的 source。</p>
+<p>Flink在流处理上的source和在批处理上的source基本一致。大致有4大类：</p>
+<ul>
+<li>基于<strong>本地集合</strong>的source（Collection-based-source）</li>
+<li>基于<strong>文件</strong>的source（File-based-source）- 读取文本文件，即符合 TextInputFormat 规范的文件，并将其作为字符串返回</li>
+<li>基于<strong>网络套接字</strong>的source（Socket-based-source）- 从 socket 读取。元素可以用分隔符切分。</li>
+<li><strong>自定义</strong>的source（Custom-source）</li>
+</ul>
+<p>下面使用addSource将Kafka数据写入Flink为例：</p>
+<p>如果需要外部数据源对接，可使用addSource，如将Kafka数据写入Flink， 先引入依赖：</p>
+<figure class="highlight xml"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka-0.11 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka-0.11_2.11<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.10.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></div></figure>
+
+<p>将Kafka数据写入Flink：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> properties = <span class="keyword">new</span> <span class="type">Properties</span>()</span><br><span class="line">properties.setProperty(<span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;localhost:9092&quot;</span>)</span><br><span class="line">properties.setProperty(<span class="string">&quot;group.id&quot;</span>, <span class="string">&quot;consumer-group&quot;</span>)</span><br><span class="line">properties.setProperty(<span class="string">&quot;key.deserializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span>)</span><br><span class="line">properties.setProperty(<span class="string">&quot;value.deserializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span>)</span><br><span class="line">properties.setProperty(<span class="string">&quot;auto.offset.reset&quot;</span>, <span class="string">&quot;latest&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> source = env.addSource(<span class="keyword">new</span> <span class="type">FlinkKafkaConsumer011</span>[<span class="type">String</span>](<span class="string">&quot;sensor&quot;</span>, <span class="keyword">new</span> <span class="type">SimpleStringSchema</span>(), properties))</span><br></pre></td></tr></table></div></figure>
+
+<p>基于网络套接字的：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> source = env.socketTextStream(<span class="string">&quot;IP&quot;</span>, <span class="type">PORT</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="Transform转换算子-1"   >
+          <a href="#Transform转换算子-1" class="heading-link"><i class="fas fa-link"></i></a>Transform转换算子</h2>
+      
+        <h3 id="1-map-1"   >
+          <a href="#1-map-1" class="heading-link"><i class="fas fa-link"></i></a>1. map</h3>
+      <p>将DataSet中的每一个元素转换为另外一个元素：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.map &#123; x =&gt; x * <span class="number">2</span> &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="2-FlatMap"   >
+          <a href="#2-FlatMap" class="heading-link"><i class="fas fa-link"></i></a>2. FlatMap</h3>
+      <p>采用一个数据元并生成零个，一个或多个数据元。将句子分割为单词的flatmap函数：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.flatMap &#123; str =&gt; str.split(<span class="string">&quot; &quot;</span>) &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="3-Filter"   >
+          <a href="#3-Filter" class="heading-link"><i class="fas fa-link"></i></a>3. Filter</h3>
+      <p>计算每个数据元的布尔函数，并保存函数返回true的数据元。过滤掉零值的过滤器：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.filter &#123; _ != <span class="number">0</span> &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="4-KeyBy"   >
+          <a href="#4-KeyBy" class="heading-link"><i class="fas fa-link"></i></a>4. KeyBy</h3>
+      <p>逻辑上将流分区为不相交的分区。具有相同Keys的所有记录都分配给同一分区。在内部，keyBy（）是使用散列分区实现的。指定键有不同的方法。</p>
+<p>此转换返回KeyedStream，其中包括使用被Keys化状态所需的KeyedStream：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.keyBy(<span class="number">0</span>) </span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="5-Reduce"   >
+          <a href="#5-Reduce" class="heading-link"><i class="fas fa-link"></i></a>5. Reduce</h3>
+      <p>被Keys化数据流上的“滚动”Reduce。将当前数据元与最后一个Reduce的值组合并发出新值：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyedStream.reduce &#123; _ + _ &#125;  </span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="6-Fold"   >
+          <a href="#6-Fold" class="heading-link"><i class="fas fa-link"></i></a>6. Fold</h3>
+      <p>具有初始值的被Keys化数据流上的“滚动”折叠。将当前数据元与最后折叠的值组合并发出新值：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result: <span class="type">DataStream</span>[<span class="type">String</span>] =  keyedStream.fold(<span class="string">&quot;start&quot;</span>)((str, i) =&gt; &#123; str + <span class="string">&quot;-&quot;</span> + i &#125;) </span><br><span class="line"></span><br><span class="line"><span class="comment">// 解释：当上述代码应用于序列（1,2,3,4,5）时，输出结果“start-1”，“start-1-2”，“start-1-2-3”，...</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="7-Aggregations"   >
+          <a href="#7-Aggregations" class="heading-link"><i class="fas fa-link"></i></a>7. Aggregations</h3>
+      <p>在被Keys化数据流上滚动聚合。min和minBy之间的差异是min返回最小值，而minBy返回该字段中具有最小值的数据元（max和maxBy相同）：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">keyedStream.sum(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">keyedStream.min(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">keyedStream.max(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">keyedStream.minBy(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">keyedStream.maxBy(<span class="number">0</span>);</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="8-Window"   >
+          <a href="#8-Window" class="heading-link"><i class="fas fa-link"></i></a>8. Window</h3>
+      <p>可以在已经分区的KeyedStream上定义Windows。Windows根据某些特征（例如，在最后5秒内到达的数据）对每个Keys中的数据进行分组。这里不再对窗口进行详解，有关窗口的完整说明，请查看这篇文章：<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=Mzg2MzU2MDYzOA==&mid=2247483905&idx=1&sn=11434f3788a8a78418d21bacddcedbf7&scene=21#wechat_redirect" >Flink 中极其重要的 Time 与 Window 详细解析</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.keyBy(<span class="number">0</span>).window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>))); </span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="9-WindowAll"   >
+          <a href="#9-WindowAll" class="heading-link"><i class="fas fa-link"></i></a>9. WindowAll</h3>
+      <p>Windows可以在常规DataStream上定义。Windows根据某些特征（例如，在最后5秒内到达的数据）对所有流事件进行分组。</p>
+<p>注意：在许多情况下，这是非并行转换。所有记录将收集在windowAll 算子的一个任务中。</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.windowAll(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>)))</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="10-Window-Apply"   >
+          <a href="#10-Window-Apply" class="heading-link"><i class="fas fa-link"></i></a>10. Window Apply</h3>
+      <p>将一般函数应用于整个窗口。</p>
+<p>注意：如果您正在使用windowAll转换，则需要使用AllWindowFunction。</p>
+<p>下面是一个手动求和窗口数据元的函数：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">windowedStream.apply &#123; <span class="type">WindowFunction</span> &#125;</span><br><span class="line"></span><br><span class="line">allWindowedStream.apply &#123; <span class="type">AllWindowFunction</span> &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="11-Window-Reduce"   >
+          <a href="#11-Window-Reduce" class="heading-link"><i class="fas fa-link"></i></a>11. Window Reduce</h3>
+      <p>将函数缩减函数应用于窗口并返回缩小的值：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">windowedStream.reduce &#123; _ + _ &#125;</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="12-Window-Fold"   >
+          <a href="#12-Window-Fold" class="heading-link"><i class="fas fa-link"></i></a>12. Window Fold</h3>
+      <p>将函数折叠函数应用于窗口并返回折叠值：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> result: <span class="type">DataStream</span>[<span class="type">String</span>] = windowedStream.fold(<span class="string">&quot;start&quot;</span>, (str, i) =&gt; &#123; str + <span class="string">&quot;-&quot;</span> + i &#125;) </span><br><span class="line"></span><br><span class="line"><span class="comment">// 上述代码应用于序列（1,2,3,4,5）时，将序列折叠为字符串“start-1-2-3-4-5”</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="13-Union"   >
+          <a href="#13-Union" class="heading-link"><i class="fas fa-link"></i></a>13. Union</h3>
+      <p>两个或多个数据流的联合，创建包含来自所有流的所有数据元的新流。注意：如果将数据流与自身联合，则会在结果流中获取两次数据元：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.union(otherStream1, otherStream2, ...)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="14-Window-Join"   >
+          <a href="#14-Window-Join" class="heading-link"><i class="fas fa-link"></i></a>14. Window Join</h3>
+      <p>在给定Keys和公共窗口上连接两个数据流：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dataStream.join(otherStream)</span><br><span class="line">    .where(&lt;key selector&gt;).equalTo(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply (<span class="keyword">new</span> <span class="type">JoinFunction</span> () &#123;...&#125;)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="15-Interval-Join"   >
+          <a href="#15-Interval-Join" class="heading-link"><i class="fas fa-link"></i></a>15. Interval Join</h3>
+      <p>在给定的时间间隔内使用公共Keys关联两个被Key化的数据流的两个数据元e1和e2，以便e1.timestamp + lowerBound &lt;= e2.timestamp &lt;= e1.timestamp + upperBound</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">am.intervalJoin(otherKeyedStream)</span><br><span class="line">    .between(<span class="type">Time</span>.milliseconds(<span class="number">-2</span>), <span class="type">Time</span>.milliseconds(<span class="number">2</span>)) </span><br><span class="line">    .upperBoundExclusive(<span class="literal">true</span>) </span><br><span class="line">    .lowerBoundExclusive(<span class="literal">true</span>) </span><br><span class="line">    .process(<span class="keyword">new</span> <span class="type">IntervalJoinFunction</span>() &#123;...&#125;)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="16-Window-CoGroup"   >
+          <a href="#16-Window-CoGroup" class="heading-link"><i class="fas fa-link"></i></a>16. Window CoGroup</h3>
+      <p>在给定Keys和公共窗口上对两个数据流进行Cogroup：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dataStream.coGroup(otherStream)</span><br><span class="line">    .where(<span class="number">0</span>).equalTo(<span class="number">1</span>)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply (<span class="keyword">new</span> <span class="type">CoGroupFunction</span> () &#123;...&#125;)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="17-Connect"   >
+          <a href="#17-Connect" class="heading-link"><i class="fas fa-link"></i></a>17. Connect</h3>
+      <p>“连接”两个保存其类型的数据流。连接允许两个流之间的共享状态：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DataStream</span>&lt;<span class="type">Integer</span>&gt; someStream = ... <span class="type">DataStream</span>&lt;<span class="type">String</span>&gt; otherStream = ... <span class="type">ConnectedStreams</span>&lt;<span class="type">Integer</span>, <span class="type">String</span>&gt; connectedStreams = someStream.connect(otherStream)</span><br><span class="line"></span><br><span class="line"><span class="comment">// ... 代表省略中间操作</span></span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="18-CoMap，CoFlatMap"   >
+          <a href="#18-CoMap，CoFlatMap" class="heading-link"><i class="fas fa-link"></i></a>18. CoMap，CoFlatMap</h3>
+      <p>类似于连接数据流上的map和flatMap：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">connectedStreams.map(</span><br><span class="line">    (_ : <span class="type">Int</span>) =&gt; <span class="literal">true</span>,</span><br><span class="line">    (_ : <span class="type">String</span>) =&gt; <span class="literal">false</span>)connectedStreams.flatMap(</span><br><span class="line">    (_ : <span class="type">Int</span>) =&gt; <span class="literal">true</span>,</span><br><span class="line">    (_ : <span class="type">String</span>) =&gt; <span class="literal">false</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="19-Split"   >
+          <a href="#19-Split" class="heading-link"><i class="fas fa-link"></i></a>19. Split</h3>
+      <p>根据某些标准将流拆分为两个或更多个流：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> split = someDataStream.split(</span><br><span class="line">  (num: <span class="type">Int</span>) =&gt;</span><br><span class="line">    (num % <span class="number">2</span>) <span class="keyword">match</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">0</span> =&gt; <span class="type">List</span>(<span class="string">&quot;even&quot;</span>)</span><br><span class="line">      <span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="type">List</span>(<span class="string">&quot;odd&quot;</span>)</span><br><span class="line">    &#125;)      </span><br></pre></td></tr></table></div></figure>
+
+
+        <h3 id="20-Select"   >
+          <a href="#20-Select" class="heading-link"><i class="fas fa-link"></i></a>20. Select</h3>
+      <p>从拆分流中选择一个或多个流：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">SplitStream</span>&lt;<span class="type">Integer</span>&gt; split;<span class="type">DataStream</span>&lt;<span class="type">Integer</span>&gt; even = split.select(<span class="string">&quot;even&quot;</span>);<span class="type">DataStream</span>&lt;<span class="type">Integer</span>&gt; odd = split.select(<span class="string">&quot;odd&quot;</span>);<span class="type">DataStream</span>&lt;<span class="type">Integer</span>&gt; all = split.select(<span class="string">&quot;even&quot;</span>,<span class="string">&quot;odd&quot;</span>)</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="Sink算子-1"   >
+          <a href="#Sink算子-1" class="heading-link"><i class="fas fa-link"></i></a>Sink算子</h2>
+      <p>支持将数据输出到：</p>
+<ul>
+<li>本地文件(参考批处理)</li>
+<li>本地集合(参考批处理)</li>
+<li>HDFS(参考批处理)</li>
+</ul>
+<p>除此之外，还支持：</p>
+<ul>
+<li><strong>sink到kafka</strong></li>
+<li>sink到mysql</li>
+<li>sink到redis</li>
+</ul>
+<p>下面以sink到kafka为例：</p>
+<figure class="highlight scala"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sinkTopic = <span class="string">&quot;test&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//样例类</span></span><br><span class="line"><span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span>(<span class="params">id: <span class="type">Int</span>, name: <span class="type">String</span>, addr: <span class="type">String</span>, sex: <span class="type">String</span></span>)</span></span><br><span class="line"><span class="class"><span class="title">val</span> <span class="title">mapper</span></span>: <span class="type">ObjectMapper</span> = <span class="keyword">new</span> <span class="type">ObjectMapper</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment">//将对象转换成字符串</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">toJsonString</span></span>(<span class="type">T</span>: <span class="type">Object</span>): <span class="type">String</span> = &#123;</span><br><span class="line">    mapper.registerModule(<span class="type">DefaultScalaModule</span>)</span><br><span class="line">    mapper.writeValueAsString(<span class="type">T</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args: <span class="type">Array</span>[<span class="type">String</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">//1.创建流执行环境</span></span><br><span class="line">    <span class="keyword">val</span> env = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment</span><br><span class="line">    <span class="comment">//2.准备数据</span></span><br><span class="line">    <span class="keyword">val</span> dataStream: <span class="type">DataStream</span>[<span class="type">Student</span>] = env.fromElements(</span><br><span class="line">      <span class="type">Student</span>(<span class="number">8</span>, <span class="string">&quot;xiaoming&quot;</span>, <span class="string">&quot;beijing biejing&quot;</span>, <span class="string">&quot;female&quot;</span>)</span><br><span class="line">    )</span><br><span class="line">    <span class="comment">//将student转换成字符串</span></span><br><span class="line">    <span class="keyword">val</span> studentStream: <span class="type">DataStream</span>[<span class="type">String</span>] = dataStream.map(student =&gt;</span><br><span class="line">      toJsonString(student) <span class="comment">// 这里需要显示SerializerFeature中的某一个，否则会报同时匹配两个方法的错误</span></span><br><span class="line">    )</span><br><span class="line">    <span class="comment">//studentStream.print()</span></span><br><span class="line">    <span class="keyword">val</span> prop = <span class="keyword">new</span> <span class="type">Properties</span>()</span><br><span class="line">    prop.setProperty(<span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;node01:9092&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> myProducer = <span class="keyword">new</span> <span class="type">FlinkKafkaProducer011</span>[<span class="type">String</span>](sinkTopic, <span class="keyword">new</span> <span class="type">KeyedSerializationSchemaWrapper</span>[<span class="type">String</span>](<span class="keyword">new</span> <span class="type">SimpleStringSchema</span>()), prop)</span><br><span class="line">    studentStream.addSink(myProducer)</span><br><span class="line">    studentStream.print()</span><br><span class="line">    env.execute(<span class="string">&quot;Flink add sink&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://licsman.github.io">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://licsman.github.io/2021/03/24/Flink%E5%B8%B8%E7%94%A8%E7%AE%97%E5%AD%90/">https://licsman.github.io/2021/03/24/Flink%E5%B8%B8%E7%94%A8%E7%AE%97%E5%AD%90/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://licsman.github.io/tags/flink/">flink</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/"><span class="paginator-prev__text">Spark分区管理</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#DataSet"><span class="toc-text">
+          DataSet</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Source%E7%AE%97%E5%AD%90"><span class="toc-text">
+          Source算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-fromCollection"><span class="toc-text">
+          1. fromCollection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-readTextFile"><span class="toc-text">
+          2. readTextFile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-readTextFile%EF%BC%9A%E9%81%8D%E5%8E%86%E7%9B%AE%E5%BD%95"><span class="toc-text">
+          3. readTextFile：遍历目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-readTextFile%EF%BC%9A%E8%AF%BB%E5%8F%96%E5%8E%8B%E7%BC%A9%E6%96%87%E4%BB%B6"><span class="toc-text">
+          4. readTextFile：读取压缩文件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transform%E8%BD%AC%E6%8D%A2%E7%AE%97%E5%AD%90"><span class="toc-text">
+          Transform转换算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-map"><span class="toc-text">
+          1. map</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-flatMap"><span class="toc-text">
+          2. flatMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-mapPartition"><span class="toc-text">
+          3. mapPartition</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-filter"><span class="toc-text">
+          4. filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-reduce"><span class="toc-text">
+          5. reduce</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-reduceGroup"><span class="toc-text">
+          6. reduceGroup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-minBy%E5%92%8CmaxBy"><span class="toc-text">
+          7. minBy和maxBy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-Aggregate"><span class="toc-text">
+          8. Aggregate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-distinct"><span class="toc-text">
+          9. distinct</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-first"><span class="toc-text">
+          10. first</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-join"><span class="toc-text">
+          11. join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-leftOuterJoin"><span class="toc-text">
+          12. leftOuterJoin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-cross"><span class="toc-text">
+          13. cross</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-union"><span class="toc-text">
+          14. union</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-rebalance"><span class="toc-text">
+          15. rebalance</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-partitionByHash"><span class="toc-text">
+          16. partitionByHash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17-partitionByRange"><span class="toc-text">
+          17. partitionByRange</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-sortPartition"><span class="toc-text">
+          18. sortPartition</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sink%E7%AE%97%E5%AD%90"><span class="toc-text">
+          Sink算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-collect"><span class="toc-text">
+          1. collect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-writeAsText"><span class="toc-text">
+          2. writeAsText</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DataStream"><span class="toc-text">
+          DataStream</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Source%E7%AE%97%E5%AD%90-1"><span class="toc-text">
+          Source算子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transform%E8%BD%AC%E6%8D%A2%E7%AE%97%E5%AD%90-1"><span class="toc-text">
+          Transform转换算子</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-map-1"><span class="toc-text">
+          1. map</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-FlatMap"><span class="toc-text">
+          2. FlatMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Filter"><span class="toc-text">
+          3. Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-KeyBy"><span class="toc-text">
+          4. KeyBy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-Reduce"><span class="toc-text">
+          5. Reduce</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-Fold"><span class="toc-text">
+          6. Fold</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-Aggregations"><span class="toc-text">
+          7. Aggregations</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-Window"><span class="toc-text">
+          8. Window</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-WindowAll"><span class="toc-text">
+          9. WindowAll</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-Window-Apply"><span class="toc-text">
+          10. Window Apply</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-Window-Reduce"><span class="toc-text">
+          11. Window Reduce</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-Window-Fold"><span class="toc-text">
+          12. Window Fold</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-Union"><span class="toc-text">
+          13. Union</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-Window-Join"><span class="toc-text">
+          14. Window Join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-Interval-Join"><span class="toc-text">
+          15. Interval Join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-Window-CoGroup"><span class="toc-text">
+          16. Window CoGroup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17-Connect"><span class="toc-text">
+          17. Connect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-CoMap%EF%BC%8CCoFlatMap"><span class="toc-text">
+          18. CoMap，CoFlatMap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-Split"><span class="toc-text">
+          19. Split</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-Select"><span class="toc-text">
+          20. Select</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sink%E7%AE%97%E5%AD%90-1"><span class="toc-text">
+          Sink算子</span></a></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20200924141735539.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">16</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">4</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">9</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2021</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>
