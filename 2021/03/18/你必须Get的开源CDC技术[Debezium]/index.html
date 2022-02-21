@@ -1,0 +1,367 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="msvalidate.01" content="A98DE9CE424AC8B232E7D714E0690DB4"><meta name="baidu-site-verification" content="code-RCHdFx39LC"><meta name="description" content="一款强大的数据采集软件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="你必须Get的开源CDC技术[Debezium]">
+<meta property="og:url" content="https://www.weflink.cn/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF[Debezium]/index.html">
+<meta property="og:site_name" content="We Learn Flink">
+<meta property="og:description" content="一款强大的数据采集软件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210318182302034.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210319102932471.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317173839095.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317173904599.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210319154931519.png">
+<meta property="article:published_time" content="2021-03-18T10:05:36.000Z">
+<meta property="article:modified_time" content="2021-03-19T10:54:26.281Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="数据采集,kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.weflink.cn/images/image-20210318182302034.png"><title>你必须Get的开源CDC技术[Debezium] | We Learn Flink</title><link ref="canonical" href="https://www.weflink.cn/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF[Debezium]/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: {"avoidBanner":true},
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">We Learn Flink</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">你必须Get的开源CDC技术[Debezium]</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-18</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-19</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">1.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">11分</span></span></div></header><div class="post-body"><p><img src="/images/image-20210318182302034.png" alt="image-20210318182302034"></p>
+<blockquote>
+<ul>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://debezium.io/" >官网地址：https://debezium.io/</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://github.com/debezium" >GitHub：https://github.com/debezium</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+<li><strong>开源方：RedHat</strong>   |   <span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://gitter.im/debezium/user" >Debezium社区讨论圈</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></li>
+</ul>
+</blockquote>
+<a id="more"></a>
+
+
+        <h1 id="1-Debezium是什么"   >
+          <a href="#1-Debezium是什么" class="heading-link"><i class="fas fa-link"></i></a>1. Debezium是什么</h1>
+      
+        <h2 id="1-1-背景"   >
+          <a href="#1-1-背景" class="heading-link"><i class="fas fa-link"></i></a>1.1 背景</h2>
+      <p>Debezium是<strong>RedHat</strong>开源的并依赖于Apache Kafka Connect的源连接器（source端），通过剖析数据库中binlog日志，捕获数据，拷贝到kafka中，实现数据的实时抽取。</p>
+
+        <h2 id="1-2-官网介绍"   >
+          <a href="#1-2-官网介绍" class="heading-link"><i class="fas fa-link"></i></a>1.2 官网介绍</h2>
+      <p>Debezium是一个用于变更数据采集的开源分布式平台。配置采集任务并指定你要捕获的数据库，然后启动任务，就可以开始响应其他应用程序提交给你的数据库的所有插入、更新和删除。Debezium是持久和快速的，所以你的采集任务可以快速响应，不会错过任何一个并更的event，即使任务出错。</p>
+
+        <h2 id="1-3-架构"   >
+          <a href="#1-3-架构" class="heading-link"><i class="fas fa-link"></i></a>1.3 架构</h2>
+      <p><img src="/images/image-20210319102932471.png" alt="image-20210319102932471"></p>
+<p>上图主要呈现了三点：</p>
+<ul>
+<li>Kafka不仅在整个链路中充当了解耦的作用，同时也是CDC数据的载体</li>
+<li>通过Debezium这款Kafka-Source连接器可以将采集到的数据发送到Kafka消息队列</li>
+<li>发送到kafka后，也可以使用Kafka Sink Connector将Kafka中的数据发送到其他存储系统（例如Es/MySQL等）</li>
+</ul>
+
+        <h2 id="1-4-部署前提"   >
+          <a href="#1-4-部署前提" class="heading-link"><i class="fas fa-link"></i></a>1.4 部署前提</h2>
+      <ul>
+<li><strong>Zookeeper</strong><ul>
+<li>分布式协调服务，Kafka集群的运行需要依赖Zookeeper来实现（Kafka集群选主）</li>
+<li>尽管Kafka在逐渐的摆脱Zookeeper这种依赖关系，例如现在的Offset信息存储在自己的topic中</li>
+</ul>
+</li>
+<li><strong>Kafka</strong><ul>
+<li>消息队列，</li>
+</ul>
+</li>
+<li><strong>Kafka-Connec</strong>t （Debezium依赖于Kafka-Connect，说）<ul>
+<li>Kafka2.0.0以后，已经自带Kafka-Connect</li>
+<li>Kafka-Connect是分布式服务，支持distributed和standalone两种模式</li>
+<li>Debezium相当于是Kafka-Source-Connector的实现，是Kafka的数据源，负责将数据传送到Kafka集群</li>
+</ul>
+</li>
+<li><strong>Confluen Avro Regisry Schema</strong> <ul>
+<li>不是必须安装，如果传输Avro格式数据，需要安装</li>
+<li>Avro格式的数据是一种压缩的byte格式数据，在传输过程中只传输数据本身，不需要像JSON那样需要携带数据的schema，只不过Avro将schema存储到Schema注册中心，这样大大的节省了数据量开销。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>实践Tips：</strong></p>
+<ul>
+<li>如果你使用的是原生的Kafka(2.0.0之后)，<code>2.0.0</code>之后kafka虽然内置了Kafka Connect，但是想要在Kafka中使用Avro格式来传输数据，需要额外安装<strong>Confluen Avro Regisry Schema</strong>才行</li>
+<li>如果你使用的是Confluent Kafka，就可以开箱即用<code>Debezium</code>，因为Confluent Kafka已经帮你把这些都做好了，你只需指定plugin.path路径，并将你要安装的debezium解压进去，重启connect服务即可</li>
+</ul>
+</blockquote>
+
+        <h2 id="1-5-安装Debezium"   >
+          <a href="#1-5-安装Debezium" class="heading-link"><i class="fas fa-link"></i></a>1.5 安装Debezium</h2>
+      <p>安装Debezium在这里就不罗嗦了，因为官方说的比我都清楚，而且每个connector的安装都是大同小异，这里是<strong>官方的Debezium MySQL connector的安装步骤：</strong></p>
+<p><strong><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://debezium.io/documentation/reference/1.4/connectors/mysql.html#installing-debezium-mysql-connectors" >Debezium MySQL connector的安装指南 【传送门】</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></strong></p>
+
+        <h1 id="2-Debezium目前的状况"   >
+          <a href="#2-Debezium目前的状况" class="heading-link"><i class="fas fa-link"></i></a>2. Debezium目前的状况</h1>
+      
+        <h2 id="2-1-Debezium目前支持的数据库"   >
+          <a href="#2-1-Debezium目前支持的数据库" class="heading-link"><i class="fas fa-link"></i></a>2.1 Debezium目前支持的数据库</h2>
+      <div class="table-container"><table>
+<thead>
+<tr>
+<th></th>
+<th>1.4</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Java</td>
+<td>8+</td>
+</tr>
+<tr>
+<td>Kafka Connect</td>
+<td>1.x, 2.x</td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td><em>Database:</em> 5.7, 8.0.x <em>JDBC Driver:</em> 8.0.19</td>
+</tr>
+<tr>
+<td>MongoDB</td>
+<td><em>Database:</em> 3.2, 3.4, 3.6, 4.0, 4.2 <em>Driver:</em> 3.12.3</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td><em>Database:</em> 9.6, 10, 11, 12 <em>JDBC Driver:</em> 42.2.12</td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><em>Database:</em> 11g, 12c <em>JDBC Driver:</em> 12.2.0.1</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td><em>Database:</em> 2017, 2019 <em>JDBC Driver:</em> 7.2.2.jre8</td>
+</tr>
+<tr>
+<td>Cassandra</td>
+<td><em>Database:</em> 3.11.4 <em>Driver:</em> 3.5.0</td>
+</tr>
+<tr>
+<td>Db2</td>
+<td><em>Database:</em> 11.5 <em>JDBC Driver:</em> 11.5.0.0</td>
+</tr>
+<tr>
+<td>Vitess</td>
+<td><em>Database:</em> 8.0.x <em>JDBC Driver:</em> 7.0.0</td>
+</tr>
+</tbody></table></div>
+
+        <h2 id="2-2-Debezium支持的数据传输格式"   >
+          <a href="#2-2-Debezium支持的数据传输格式" class="heading-link"><i class="fas fa-link"></i></a>2.2 Debezium支持的数据传输格式</h2>
+      <blockquote>
+<p><span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://debezium.io/documentation/reference/1.4/configuration/avro.html" >官方文档</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+<p>目前Debezium采集到的数据支持以<code>JSON</code>或者<code>Apache Avro</code>的格式发往Kafka，用户可以在配置文件中指定</p>
+<p>这里以Confluent Kafka的配置问件<code>connect-distributed.properties</code>为例：</p>
+<figure class="highlight properties"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#发送到kafka的集群地址</span></span><br><span class="line"><span class="meta">bootstrap.servers</span>=<span class="string">172.20.3.180:9092,172.20.3.181:9092,172.20.3.182:9092</span></span><br><span class="line"><span class="comment">#kafka中的数据格式以及avro注册中心</span></span><br><span class="line"><span class="meta">key.converter</span>=<span class="string">io.confluent.connect.avro.AvroConverter</span></span><br><span class="line"><span class="meta">key.converter.schema.registry.url</span>=<span class="string">http://172.20.3.180:8091</span></span><br><span class="line"><span class="meta">value.converter</span>=<span class="string">io.confluent.connect.avro.AvroConverter</span></span><br><span class="line"><span class="meta">value.converter.schema.registry.url</span>=<span class="string">http://172.20.3.180:8091</span></span><br><span class="line"></span><br><span class="line"><span class="meta">internal.key.converter</span>=<span class="string">org.apache.kafka.connect.json.JsonConverter</span></span><br><span class="line"><span class="meta">internal.value.converter</span>=<span class="string">org.apache.kafka.connect.json.JsonConverter</span></span><br><span class="line"><span class="comment">#如果以Json格式传输，要改为true</span></span><br><span class="line"><span class="meta">internal.key.converter.schemas.enable</span>=<span class="string">false</span></span><br><span class="line"><span class="meta">internal.value.converter.schemas.enable</span>=<span class="string">false</span></span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h1 id="3-Debezium与Flink"   >
+          <a href="#3-Debezium与Flink" class="heading-link"><i class="fas fa-link"></i></a>3. Debezium与Flink</h1>
+      
+        <h2 id="3-1-传统的Debezium-Kafka架构"   >
+          <a href="#3-1-传统的Debezium-Kafka架构" class="heading-link"><i class="fas fa-link"></i></a>3.1 传统的Debezium+Kafka架构</h2>
+      <p><img src="/images/image-20210317173839095.png" alt="image-20210317173839095"></p>
+<p>这种方案中利用 Kafka 消息队列做解耦，Change Log 可供任何其他业务系统使用，消费端可采用 Kafka Sink Connector 或者自定义消费程序，但是由于原生 Debezium 中的 Producer 端未采用幂等特性，因此消息可能存在重复。</p>
+<ul>
+<li>中间计算层使用Flink可以灵活的接收来自Kafka中不同格式的数据进行计算最后Sink到不同的地方</li>
+</ul>
+
+        <h2 id="3-2-Debezium与Flink-SQL"   >
+          <a href="#3-2-Debezium与Flink-SQL" class="heading-link"><i class="fas fa-link"></i></a>3.2 Debezium与Flink SQL</h2>
+      <blockquote>
+<p>我的另一篇：<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://licsman.github.io/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/" >这里有更详细的分析关于Flink-SQL-CDC方案</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h3 id="3-2-1-利用Flink-SQL接入kafka中debezium-json格式数据"   >
+          <a href="#3-2-1-利用Flink-SQL接入kafka中debezium-json格式数据" class="heading-link"><i class="fas fa-link"></i></a>3.2.1 利用Flink SQL接入kafka中debezium-json格式数据</h3>
+      <p><img src="/images/image-20210317173904599.png" alt="image-20210317173839095"></p>
+<p>与传统方案的区别就是，通过Flink SQL创建 Kafka 表，指定 format 格式为 debezium-json，然后通过 Flink 进行计算后或者直接插入到其他外部数据存储系统。方案二和方案一类似，组件多维护繁杂，而前述我们知道 Flink 1.11 中 CDC Connectors 内置了 Debezium 引擎，可以替换 Debezium+Kafka 方案，因此有了更简化的方案(3.2.2)。</p>
+
+        <h3 id="3-2-2-直接使用Flink-SQL进行数据采集"   >
+          <a href="#3-2-2-直接使用Flink-SQL进行数据采集" class="heading-link"><i class="fas fa-link"></i></a>3.2.2 直接使用Flink SQL进行数据采集</h3>
+      <p><img src="/images/image-20210319154931519.png" alt="image-20210319154931519"></p>
+<p>从官方的描述中，通过 Flink CDC connectors 替换 Debezium+Kafka 的数据采集模块，实现 Flink SQL 采集+计算+传输(ETL)一体化，优点很多：</p>
+<ul>
+<li>开箱即用，简单易上手</li>
+<li>减少维护的组件，简化实时链路，减轻部署成本</li>
+<li>减小端到端延迟</li>
+<li>Flink 自身支持 Exactly Once 的读取和计算</li>
+<li>数据不落地，减少存储成本</li>
+<li>支持全量和增量流式读取</li>
+<li>binlog 采集位点可回溯</li>
+</ul>
+
+        <h1 id="4-Debezium实践特性"   >
+          <a href="#4-Debezium实践特性" class="heading-link"><i class="fas fa-link"></i></a>4. Debezium实践特性</h1>
+      
+        <h2 id="4-1-MySQL"   >
+          <a href="#4-1-MySQL" class="heading-link"><i class="fas fa-link"></i></a>4.1 MySQL</h2>
+      <ul>
+<li>支持增量、全量数据的采集</li>
+<li>高可用，某个节点挂机，会重新将采集任务调度到其他节点</li>
+<li>采集粒度支持<code>库/表/列</code>级别</li>
+<li>通过GTID-Mode支持事务性采集数据<ul>
+<li>GTID（Global Unique Identifer）全局唯一标记，GTID可以保证在主从复制的时候做到一致性，意味着debezium可以保证采集到的数据做到事务一致性</li>
+</ul>
+</li>
+<li>Tips:Flink SQL可以通过checkpoint机制来实现exactly once，CheckpointedFuntion中利用binlog-id来实现</li>
+</ul>
+<blockquote>
+<p>提示：我的另一篇会专门以<span class="exturl"><a class="exturl__link"   target="_blank" rel="noopener" href="https://licsman.github.io/2020/09/24/debezium2mysql_doc/" >Debezium-Mysql为例来全面介绍任务的配置、发布和遇到的问题</a><span class="exturl__icon"><i class="fas fa-external-link-alt"></i></span></span></p>
+</blockquote>
+
+        <h2 id="4-2-SQLServer"   >
+          <a href="#4-2-SQLServer" class="heading-link"><i class="fas fa-link"></i></a>4.2 SQLServer</h2>
+      <ul>
+<li>支持增量、全量数据的采集</li>
+<li>高可用，某个节点挂机，会重新将采集任务调度到其他节点</li>
+<li>采集粒度支持<code>库/表/列</code>级别</li>
+<li>采集任务的语义可以做到at-least-once</li>
+<li>SQLServer的bin-log记录到一张系统表上</li>
+</ul>
+
+        <h2 id="4-3-Oracle（孵化中）"   >
+          <a href="#4-3-Oracle（孵化中）" class="heading-link"><i class="fas fa-link"></i></a>4.3 Oracle（孵化中）</h2>
+      <ul>
+<li>采集方式支持两种<ul>
+<li>LogMiner</li>
+<li>XStream（需要购买Oracle Golden Gate的License版权）</li>
+</ul>
+</li>
+<li>支持全量的数据采集</li>
+<li>采集粒度支持<code>库/表</code>级别</li>
+</ul>
+
+        <h1 id="5-Debezium目前存在的问题"   >
+          <a href="#5-Debezium目前存在的问题" class="heading-link"><i class="fas fa-link"></i></a>5. Debezium目前存在的问题</h1>
+      <ul>
+<li>Kafka集群地址不可在任务上自由配置，在部署时候就已经确定</li>
+<li>数据采集格式不可在任务上自由配置，在部署时候就已经确定</li>
+<li>Oracle支持的不够稳定、容错支持的不够好，Oracle服务器重启，采集任务无法正常运行，不能唤起</li>
+</ul>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://www.weflink.cn">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://www.weflink.cn/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF[Debezium]/">https://www.weflink.cn/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF[Debezium]/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://www.weflink.cn/tags/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86-kafka/">数据采集,kafka</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2021/03/22/Spark%E5%88%86%E5%8C%BA%E7%AE%A1%E7%90%86/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">Spark分区管理</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/17/Exactly-Once%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88-%E2%85%A1/"><span class="paginator-prev__text">Exactly_Once到底是什么-Ⅱ</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="gitalk-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Debezium%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">
+          1. Debezium是什么</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E8%83%8C%E6%99%AF"><span class="toc-text">
+          1.1 背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E5%AE%98%E7%BD%91%E4%BB%8B%E7%BB%8D"><span class="toc-text">
+          1.2 官网介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E6%9E%B6%E6%9E%84"><span class="toc-text">
+          1.3 架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-%E9%83%A8%E7%BD%B2%E5%89%8D%E6%8F%90"><span class="toc-text">
+          1.4 部署前提</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-5-%E5%AE%89%E8%A3%85Debezium"><span class="toc-text">
+          1.5 安装Debezium</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Debezium%E7%9B%AE%E5%89%8D%E7%9A%84%E7%8A%B6%E5%86%B5"><span class="toc-text">
+          2. Debezium目前的状况</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Debezium%E7%9B%AE%E5%89%8D%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">
+          2.1 Debezium目前支持的数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Debezium%E6%94%AF%E6%8C%81%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E6%A0%BC%E5%BC%8F"><span class="toc-text">
+          2.2 Debezium支持的数据传输格式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Debezium%E4%B8%8EFlink"><span class="toc-text">
+          3. Debezium与Flink</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BC%A0%E7%BB%9F%E7%9A%84Debezium-Kafka%E6%9E%B6%E6%9E%84"><span class="toc-text">
+          3.1 传统的Debezium+Kafka架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-Debezium%E4%B8%8EFlink-SQL"><span class="toc-text">
+          3.2 Debezium与Flink SQL</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-1-%E5%88%A9%E7%94%A8Flink-SQL%E6%8E%A5%E5%85%A5kafka%E4%B8%ADdebezium-json%E6%A0%BC%E5%BC%8F%E6%95%B0%E6%8D%AE"><span class="toc-text">
+          3.2.1 利用Flink SQL接入kafka中debezium-json格式数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-2-%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8Flink-SQL%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86"><span class="toc-text">
+          3.2.2 直接使用Flink SQL进行数据采集</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-Debezium%E5%AE%9E%E8%B7%B5%E7%89%B9%E6%80%A7"><span class="toc-text">
+          4. Debezium实践特性</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-MySQL"><span class="toc-text">
+          4.1 MySQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-SQLServer"><span class="toc-text">
+          4.2 SQLServer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-Oracle%EF%BC%88%E5%AD%B5%E5%8C%96%E4%B8%AD%EF%BC%89"><span class="toc-text">
+          4.3 Oracle（孵化中）</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Debezium%E7%9B%AE%E5%89%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">
+          5. Debezium目前存在的问题</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20210401145634365.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">17</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">5</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">9</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2022</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax@latest/pjax.min.js"></script><script>window.addEventListener('DOMContentLoaded', function () {
+  var pjax = new Pjax({"selectors":["head title","#main",".pjax-reload"],"history":true,"scrollTo":false,"scrollRestoration":false,"cacheBust":false,"debug":false,"currentUrlFullReload":false,"timeout":0});
+  // 加载进度条的计时器
+  var loadingTimer = null;
+
+  // 重置页面 Y 方向上的滚动偏移量
+  document.addEventListener('pjax:send', function () {
+    $('.header-nav-menu').removeClass('show');
+    if (CONFIG.pjax && CONFIG.pjax.avoidBanner) {
+      $('html').velocity('scroll', {
+        duration: 500,
+        offset: $('#header').height(),
+        easing: 'easeInOutCubic'
+      });
+    }
+
+    var loadingBarWidth = 20;
+    var MAX_LOADING_WIDTH = 95;
+
+    $('.loading-bar').addClass('loading');
+    $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    clearInterval(loadingTimer);
+    loadingTimer = setInterval(function () {
+      loadingBarWidth += 3;
+      if (loadingBarWidth > MAX_LOADING_WIDTH) {
+        loadingBarWidth = MAX_LOADING_WIDTH;
+      }
+      $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    }, 500);
+  }, false);
+
+  window.addEventListener('pjax:complete', function () {
+    clearInterval(loadingTimer);
+    $('.loading-bar__progress').css('width', '100%');
+    $('.loading-bar').removeClass('loading');
+    setTimeout(function () {
+      $('.loading-bar__progress').css('width', '0');
+    }, 400);
+    $('link[rel=prefetch], script[data-pjax-rm]').each(function () {
+      $(this).remove();
+    });
+    $('script[data-pjax], #pjax-reload script').each(function () {
+      $(this).parent().append($(this).remove());
+    });
+
+    if (Stun.utils.pjaxReloadBoot) {
+      Stun.utils.pjaxReloadBoot();
+    }
+    if (Stun.utils.pjaxReloadScroll) {
+      Stun.utils.pjaxReloadScroll();
+    }
+    if (Stun.utils.pjaxReloadSidebar) {
+      Stun.utils.pjaxReloadSidebar();
+    }
+    if (false) {
+      if (Stun.utils.pjaxReloadHeader) {
+        Stun.utils.pjaxReloadHeader();
+      }
+      if (Stun.utils.pjaxReloadScrollIcon) {
+        Stun.utils.pjaxReloadScrollIcon();
+      }
+      if (Stun.utils.pjaxReloadLocalSearch) {
+        Stun.utils.pjaxReloadLocalSearch();
+      }
+    }
+  }, false);
+}, false);</script><div id="pjax-reload"></div><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js" data-pjax=""></script><script src="https://cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js" data-pjax=""></script><script data-pjax="">function loadGitalk () {
+  if (!document.getElementById('gitalk-container')) {
+    return;
+  }
+
+  var gitalk = new Gitalk({
+    id: md5(window.location.pathname.slice(1)),
+    clientID: 'fbfd847f3a3ecae8a5e2',
+    clientSecret: '7efe5ae2536a38793d8bedfa0e65f03f205ab393',
+    repo: 'licsman.github.io',
+    owner: 'licsman',
+    admin: ['licsman'],
+    distractionFreeMode: 'true',
+    language: 'zh-CN'
+  });
+  gitalk.render('gitalk-container');
+}
+
+if (true) {
+  loadGitalk();
+} else {
+  window.addEventListener('DOMContentLoaded', loadGitalk, false);
+}</script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>

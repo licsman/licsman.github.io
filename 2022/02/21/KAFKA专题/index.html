@@ -1,0 +1,939 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="msvalidate.01" content="A98DE9CE424AC8B232E7D714E0690DB4"><meta name="baidu-site-verification" content="code-RCHdFx39LC"><meta name="description" content="Kafka专题全面解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka专题">
+<meta property="og:url" content="https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/index.html">
+<meta property="og:site_name" content="We Learn Flink">
+<meta property="og:description" content="Kafka专题全面解析">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220221181915651.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220217105429113.png">
+<meta property="og:image" content="https://www.weflink.cn/images/11e4b49b4f73fabde62b002de7e140df.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218152752305.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218152207479.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218154900904.png">
+<meta property="og:image" content="https://www.weflink.cn/images/20210709105606.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218175747428.png">
+<meta property="og:image" content="https://www.weflink.cn/images/13611dbe571bac3381b433ccd04e0741.png">
+<meta property="og:image" content="https://www.weflink.cn/images/67ff4cec7b48200efec1440d7ca5f8fa.png">
+<meta property="og:image" content="https://www.weflink.cn/images/4df2fe09a60f80f6ccffa2c4afa9bb2b.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218182648620.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20220218182742652.png">
+<meta property="article:published_time" content="2022-02-21T10:14:51.666Z">
+<meta property="article:modified_time" content="2022-02-21T10:27:20.419Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="大数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.weflink.cn/images/image-20220221181915651.png"><title>Kafka专题 | We Learn Flink</title><link ref="canonical" href="https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: {"avoidBanner":true},
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">We Learn Flink</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Kafka专题</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2022-02-21</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2022-02-21</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">7.8k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">48分</span></span></div></header><div class="post-body"><p><img src="/images/image-20220221181915651.png" alt="image-20220221181915651"></p>
+
+        <h1 id="Kafka专题"   >
+          <a href="#Kafka专题" class="heading-link"><i class="fas fa-link"></i></a>Kafka专题</h1>
+      <blockquote>
+<p>Write by MiaoJiawei 2022年2月18日 18点36分</p>
+</blockquote>
+<a id="more"></a>
+
+
+        <h2 id="1-消息队列"   >
+          <a href="#1-消息队列" class="heading-link"><i class="fas fa-link"></i></a>1. 消息队列</h2>
+      <ol>
+<li><p>消息队列是什么？</p>
+<ul>
+<li>消息队列是一种异步的服务间通信方式,是分布式系统中重要的组件,主要解决应用耦合,异步消息,流量削锋等问题,实现高性能,高可用,可伸缩和最终一致性架构。</li>
+<li>简单点说：消息队列MQ用于实现两个系统之间或者两个模块之间传递消息数据时，实现数据缓存</li>
+</ul>
+</li>
+<li><p>功能</p>
+<ul>
+<li><strong>基于队列的方式，实现数据缓存</strong></li>
+</ul>
+</li>
+<li><p>应用场景</p>
+<ul>
+<li>用于所有需要实现实时、高性能、高吞吐、高可靠的消息传递架构中</li>
+</ul>
+</li>
+<li><p>优点</p>
+<ul>
+<li>实现了架构解耦</li>
+<li><strong>保证了最终一致性</strong></li>
+<li><strong>实现异步，提供传输性能</strong></li>
+</ul>
+</li>
+<li><p>缺点</p>
+<ul>
+<li>增加了消息队列，架构运维更加复杂</li>
+<li>数据一致性保证更加复杂，必须保证生产安全和消费安全</li>
+</ul>
+</li>
+<li><p>同步与异步</p>
+<ol>
+<li><p>同步的流程</p>
+<ol>
+<li><p>step1：用户提交请求</p>
+<p>step2：后台处理请求</p>
+<p>step3：将处理的结果返回给用户</p>
+</li>
+<li><p>特点：用户看到的结果就是我处理好的结果</p>
+</li>
+<li><p>场景：去银行存钱、转账等，必须看到真正处理的结果才能表示成功，实现<strong>立即一致性</strong></p>
+</li>
+</ol>
+</li>
+<li><p>异步的流程</p>
+<ol>
+<li><p>step1：用于提交请求</p>
+<p>step2：后台将请求放入消息队列，等待处理，返回给用户一个临时结果</p>
+<p>step3：用户看到临时的结果，真正的请求在后台等待处理</p>
+</li>
+<li><p>特点：用户看到的结果并不是我们已经处理的结果</p>
+</li>
+<li><p>场景：用户暂时不需要关心真正处理结果的场景下，只要保证这个最终结果是用户想要的结果即可，实现<strong>最终一致性</strong></p>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+        <h2 id="2-Kafka的组件"   >
+          <a href="#2-Kafka的组件" class="heading-link"><i class="fas fa-link"></i></a>2. Kafka的组件</h2>
+      
+        <h3 id="2-1-kafka的架构图"   >
+          <a href="#2-1-kafka的架构图" class="heading-link"><i class="fas fa-link"></i></a>2.1 kafka的架构图</h3>
+      <p><img src="/images/image-20220217105429113.png" alt="image-20220217105429113"></p>
+
+        <h3 id="2-2-kafka的Producer、Consumer、Consumer-Group、Broker"   >
+          <a href="#2-2-kafka的Producer、Consumer、Consumer-Group、Broker" class="heading-link"><i class="fas fa-link"></i></a>2.2 kafka的Producer、Consumer、Consumer Group、Broker</h3>
+      <ul>
+<li><strong>Producer</strong>：生产者，负责写入数据到Kafka</li>
+<li><strong>Consumer</strong>：消费者，负责从Kafka消费读取数据</li>
+<li><strong>Consumer Group</strong>：消费者组：Kafka中的数据消费必须以消费者组为单位<ul>
+<li>一个消费者组可以包含多个消费者，注意<strong>多个消费者消费的数据加在一起是一份完整的数据</strong></li>
+<li>目的：提高性能</li>
+<li><strong>消费者组消费Topic</strong></li>
+<li><strong>消费者组中的消费者消费Topic的分区</strong></li>
+</ul>
+</li>
+<li><strong>Broker</strong>：Kafka一个节点，多个Broker节点，构建为一个Kafka集群<ul>
+<li>主从架构：类似于【Zookeeper】、【HDFS：NameNode、DataNode】、【Hbase：HMaster、HRegionServer】</li>
+<li>Kafka：Kafka<ul>
+<li>主：<strong>Kafka Controller</strong>：管理集群中的Topic、分区、副本选举</li>
+<li>从：<strong>Kafka Broke</strong>r：对外接受读写请求，存储分区数据</li>
+<li>启动Kafka时候，会从所有的Broker选举一个Controller，如果Controller故障，会从其他的Broker重新选举一个</li>
+<li>选举：使用ZK是实现辅助选举</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Zookeeper</strong><ul>
+<li>辅助选举Active的主节点：Crontroller</li>
+<li>存储核心元数据</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="2-3-kafka的Topic、Partition、Replication"   >
+          <a href="#2-3-kafka的Topic、Partition、Replication" class="heading-link"><i class="fas fa-link"></i></a>2.3 kafka的Topic、Partition、Replication</h3>
+      <ul>
+<li><p><strong>Topic</strong>：逻辑上实现数据存储的分类，类似于数据库中的表概念</p>
+</li>
+<li><p><strong>Partition</strong>：Topic中用于实现分布式存储的物理单元，一个Topic可以有多个分区</p>
+</li>
+<li><p><strong>Replication</strong>：每个分区可以存储在不同的节点，实现分布式存储</p>
+</li>
+<li><p><strong>Replication副本机制</strong>：Kafka中每个分区可以构建多个副本【<strong>副本个数 &lt;= 机器的个数</strong>】</p>
+<ul>
+<li><p>将一个分区的多个副本分为两种角色</p>
+<ul>
+<li><p>leader副本：负责对外提供读写请求</p>
+</li>
+<li><p>follower副本：负责与leader同步数据，如果leader故障，follower要重新选举一个成为leader</p>
+</li>
+</ul>
+</li>
+<li><p><strong>副本角色的选举</strong>：不由ZK实现选举，<strong>由Kafka Crontroller</strong>来决定谁是leader</p>
+</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="2-4-kafka的Offset"   >
+          <a href="#2-4-kafka的Offset" class="heading-link"><i class="fas fa-link"></i></a>2.4 kafka的Offset</h3>
+      <ul>
+<li>Offset是kafka中存储数据时给每个数据做的标记或者编号<ul>
+<li>分区级别的编号</li>
+<li>从0开始编号</li>
+</ul>
+</li>
+<li>功能：消费者根据offset来进行消费，保证顺序消费，数据安全</li>
+</ul>
+
+        <h3 id="2-5-kafka的Segment"   >
+          <a href="#2-5-kafka的Segment" class="heading-link"><i class="fas fa-link"></i></a>2.5 kafka的Segment</h3>
+      <p><img src="/images/11e4b49b4f73fabde62b002de7e140df.png" alt="image-20210328164220108"></p>
+<ul>
+<li><p>Segment的作用：对分区内部的数据进行更细的划分，分区段，文件段</p>
+<ul>
+<li>类似于Region中划分store</li>
+</ul>
+</li>
+<li><p>规则：按照文件产生的时间或者大小</p>
+</li>
+<li><p>目的：提高<strong>写入和查询性能</strong>，<strong>增加删除效率</strong>：避免一条一条删除，按照整个Segment进行删除</p>
+</li>
+<li><p><strong>Segment的命名规则：用最小的offset命名的，可以用于检索数据</strong></p>
+</li>
+<li><p>组成：每个Segment由两个文件组成（<strong>真正在broker磁盘上的路径：topic-partiotion/.log&amp;.index</strong>）</p>
+<ul>
+<li>.log：存储的数据</li>
+<li><strong>.index：对应.log文件的索引信息</strong></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">分区名称 &#x3D; Topic名称 + 分区编号</span><br><span class="line">[root@node1 ~]# ll &#x2F;export&#x2F;server&#x2F;kafka_2.12-2.4.1&#x2F;logs&#x2F;</span><br><span class="line">总用量 1212</span><br><span class="line">drwxr-xr-x 2 root root   4096 3月  31 08:59 bigdata01-0</span><br><span class="line">drwxr-xr-x 2 root root    215 3月  31 11:23 bigdata01-1</span><br><span class="line">drwxr-xr-x 2 root root    215 3月  31 11:23 bigdata01-2</span><br><span class="line"></span><br><span class="line">Segment</span><br><span class="line">-rw-r--r-- 1 root root     530080 3月  30 10:48 00000000000000000000.index</span><br><span class="line">-rw-r--r-- 1 root root 1073733423 3月  30 10:48 00000000000000000000.log</span><br><span class="line"></span><br><span class="line">-rw-r--r-- 1 root root     530072 3月  30 10:49 00000000000001060150.index</span><br><span class="line">-rw-r--r-- 1 root root 1073734280 3月  30 10:49 00000000000001060150.log</span><br><span class="line"></span><br><span class="line">-rw-r--r-- 1 root root     189832 3月  31 11:23 00000000000002120301.index</span><br><span class="line">-rw-r--r-- 1 root root  384531548 3月  30 10:49 00000000000002120301.log</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h2 id="3-Kafka的工作原理"   >
+          <a href="#3-Kafka的工作原理" class="heading-link"><i class="fas fa-link"></i></a>3. Kafka的工作原理</h2>
+      
+        <h3 id="3-1-Kafka的写入过程"   >
+          <a href="#3-1-Kafka的写入过程" class="heading-link"><i class="fas fa-link"></i></a>3.1 Kafka的写入过程</h3>
+      <ol>
+<li>step1：生产者生产每一条数据，将数据放入一个batch批次中，<strong>如果batch满了</strong>或者达到一定的时间，提交写入请求</li>
+<li>step2：Kafka根据分区规则将数据写入分区，请求ZK获取对应的元数据，将请求提交给leader副本所在的Broker<ol>
+<li>元数据存储：Zookeeper中</li>
+</ol>
+</li>
+<li>step3：先<strong>写入这台Broker的PageCache中</strong><ul>
+<li>Kafka也用了内存机制来实现数据的快速的读写：不同于Hbase的内存设计</li>
+<li>Hbase：JVM堆内存<ol>
+<li>所有Java程序都是使用JVM堆内存来实现数据管理</li>
+<li>缺点：GC：从内存中清理掉不再需要的数据，导致GC停顿，影响性能，如果HRegionServer故障，JVM堆内存中的数据就丢失了，只能通过HLog恢复，性能比较差</li>
+</ol>
+</li>
+<li>Kafka：操作系统Page Cache，选用了操作系统自带的缓存区域：<strong>PageCache（页缓存）</strong></li>
+<li>由操作系统来管理所有内存，即使Kafka Broker故障，数据依旧存在PageCache中</li>
+</ul>
+</li>
+<li>step4：操作系统的后台的自动将页缓存中的数据SYNC同步到磁盘文件中：最新的Segment的.log中<ol>
+<li><strong>顺序写磁盘</strong>：不断将每一条数据追加到.log文件中</li>
+</ol>
+</li>
+<li>step5：其他的<strong>Follower到Leader中同步数据</strong></li>
+</ol>
+
+        <h3 id="3-2-为什么Kafka写入速度很快？"   >
+          <a href="#3-2-为什么Kafka写入速度很快？" class="heading-link"><i class="fas fa-link"></i></a>3.2 为什么Kafka写入速度很快？</h3>
+      <p><img src="/images/image-20220218152752305.png" alt="image-20220218152752305"></p>
+<ul>
+<li><p>利用 Partition 实现并行处理</p>
+</li>
+<li><p>顺序写磁盘：<strong>Kafka 中每个分区是一个有序的，不可变的消息序列</strong>，新的消息不断追加到 partition 的末尾，这个就是顺序写。</p>
+</li>
+<li><p>即便是顺序写入硬盘，硬盘的访问速度还是不可能追上内存。所以Kafka的数据并不是实时的写入硬盘 ，<strong>它充分利用了现代操作系统分页存储来利用内存提高I/O效率。</strong></p>
+</li>
+<li><p><strong>Memory Mapped Files:**简称 mmap，也有叫 **MMFile</strong> 的，使用 mmap 的目的是<strong>将内核中读缓冲区（read buffer）的地址与用户空间的缓冲区（user buffer）进行映射</strong>。从而实现内核缓冲区与应用程序内存的共享，省去了将数据从内核读缓冲区（read buffer）拷贝到用户缓冲区（user buffer）的过程。它的工作原理是直接利用操作系统的 Page 来实现文件到物理内存的直接映射。完成映射之后你对物理内存的操作会被同步到硬盘上。使用这种方式可以获取很大的 I/O 提升，省去了用户空间到内核空间复制的开销，也就是节省了CPU的开销。</p>
+</li>
+<li><p>传统的网络数据持久化到磁盘</p>
+<blockquote>
+<p>DMA（Direct Memory Access）：直接存储器访问。DMA 是一种无需 CPU 的参与，让外设和系统内存之间进行双向数据传输的硬件机制。使用 DMA 可以使系统 CPU 从实际的 I/O 数据传输过程中摆脱出来，从而大大提高系统的吞吐率。</p>
+</blockquote>
+<ol>
+<li>首先通过 DMA copy 将网络数据拷贝到内核态 Socket Buffer</li>
+<li>然后应用程序将内核态 Buffer 数据读入用户态（CPU copy）</li>
+<li>接着用户程序将用户态 Buffer 再拷贝到内核态（CPU copy）</li>
+<li>最后通过 DMA copy 将数据拷贝到磁盘文件</li>
+<li>如图：<img src="/images/image-20220218152207479.png" alt="image-20220218152207479"></li>
+</ol>
+</li>
+</ul>
+
+        <h3 id="3-3-Kafka的读取过程"   >
+          <a href="#3-3-Kafka的读取过程" class="heading-link"><i class="fas fa-link"></i></a>3.3 Kafka的读取过程</h3>
+      <ol>
+<li>step1：消费者根据Topic、Partition、Offset提交给Kafka请求读取数据</li>
+<li>step2：Kafka根据元数据信息，找到对应的这个分区对应的Leader副本</li>
+<li>step3：请求Leader副本所在的Broker，先读PageCache，通过零拷贝机制【Zero Copy】读取PageCache</li>
+<li>step4：如果PageCache中没有，读取Segment文件段，先根据offset找到要读取的那个Segment</li>
+<li>step5：将.log文件对应的.index文件加载到内存中，根据.index中索引的信息找到Offset在.log文件中的最近位置，最近位置是指index中记录的稀疏索引【不是每一条数据都有索引】</li>
+<li>step6：读取.log，根据索引读取对应Offset的数据</li>
+</ol>
+
+        <h3 id="3-4-为什么Kafka读取数据很快？"   >
+          <a href="#3-4-为什么Kafka读取数据很快？" class="heading-link"><i class="fas fa-link"></i></a>3.4 为什么Kafka读取数据很快？</h3>
+      <blockquote>
+<p>Linux 2.4+ 内核通过 sendfile 系统调用，提供了零拷贝。数据通过 DMA 拷贝到内核态 Buffer 后，直接通过 DMA 拷贝到 NIC Buffer，无需 CPU 拷贝。这也是零拷贝这一说法的来源。除了减少数据拷贝外，因为整个读文件 - 网络发送由一个 sendfile 调用完成，整个过程只有两次上下文切换，因此大大提高了性能。</p>
+</blockquote>
+<p><img src="/images/image-20220218154900904.png" alt="image-20220218154900904"></p>
+<ul>
+<li>优先基于PageCache内存的读取，使用零拷贝机制</li>
+<li>按照Offset有序读取每一条</li>
+<li>构建Segment文件段</li>
+<li>构建index索引</li>
+</ul>
+
+        <h3 id="3-5-Kafka的存储中index的索引设计"   >
+          <a href="#3-5-Kafka的存储中index的索引设计" class="heading-link"><i class="fas fa-link"></i></a>3.5 Kafka的存储中index的索引设计</h3>
+      <blockquote>
+<p>常见的索类型：</p>
+<ul>
+<li>全量索引：每一条数据，都对应一条索引</li>
+<li><strong>稀疏索引</strong>：部分数据有索引，有一部分数据是没有索引的，<strong>Kafka采用的是这种索引</strong><ul>
+<li>优点：<strong>减少了索引存储的数据量</strong>   /   <strong>加快索引的</strong>检索效率**</li>
+<li>什么时候生成一条索引？：<code>log.index.interval.bytes=4096</code>，即.log文件每增加4096字节，在.index中增加一条索引</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p><img src="/images/20210709105606.png" alt="image-20210330220753258"></p>
+<p><strong>索引内容：</strong></p>
+<ul>
+<li>第一列：这条数据在这个文件中的位置</li>
+<li>第二列：这条数据在文件中的物理偏移量</li>
+</ul>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">是这个文件中的第几条,数据在这个文件中的物理位置</span><br><span class="line">1,0				--表示这个文件中的第一条，在文件中的位置是第0个字节开始</span><br><span class="line">3,497			--表示这个文件中的第三条，在文件中的位置是第497个字节开始</span><br></pre></td></tr></table></div></figure>
+
+<p><strong>检索数据流程：</strong></p>
+<ul>
+<li>step1：先根据offset计算这条offset是这个文件中的第几条</li>
+<li>step2：读取.index索引，根据二分检索，从索引中找到离这条数据最近偏小的位置</li>
+<li>step3：读取.log文件从最近位置读取到要查找的数据</li>
+</ul>
+<p><strong>检索数据举例：</strong></p>
+<p>需求：查找offset = 368772</p>
+<ol>
+<li><p>step1：计算是文件中的第几条</p>
+<ol>
+<li><pre><code>368772 - 368769 = 3 + 1 = 4，是这个文件中的第四条数据
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">2. step2：读取.index索引，找到最近位置 【3,497】</span><br><span class="line"></span><br><span class="line">3. step3：读取.log，从497位置向后读取一条数据，得到offset &#x3D; 368772的数据</span><br><span class="line"></span><br><span class="line">**为什么不直接将offset作为索引的第一列？**</span><br><span class="line"></span><br><span class="line">- 因为Offset越来越大，导致索引存储越来越大，空间占用越多，检索索引比较就越麻烦</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 3.6  Kafka数据清理规则</span><br><span class="line"></span><br><span class="line">- Kafka用于实现实时消息队列的数据缓存，不需要永久性的存储数据，如何将过期数据进行清理？</span><br><span class="line">- delete方案：根据时间定期的清理过期的Segment文件，默认为7天</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 3.7 Kafka的分区副本概念：AR、ISR、OSR</span><br><span class="line"></span><br></pre></td></tr></table></div></figure>
+Topic: bigdata01   PartitionCount: 3         ReplicationFactor: 2      Configs: segment.bytes=1073741824
+Topic: bigdata01   Partition: 0 Leader: 2    Replicas: 1,2   Isr: 2,1
+Topic: bigdata01   Partition: 1 Leader: 0    Replicas: 0,1   Isr: 1,0
+Topic: bigdata01   Partition: 2 Leader: 2    Replicas: 2,0   Isr: 2,0
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- 分区副本机制：每个kafka中分区都可以构建多个副本，相同分区的副本存储在不同的节点上</span><br><span class="line"></span><br><span class="line">  - 为了保证安全和写的性能：划分了副本角色</span><br><span class="line">  - leader副本：对外提供读写数据</span><br><span class="line">  - follower副本：与Leader同步数据，如果leader故障，选举一个新的leader</span><br><span class="line"></span><br><span class="line">- AR：All - Replicas</span><br><span class="line"></span><br><span class="line">  - 所有副本：指的是一个分区在所有节点上的副本</span><br><span class="line"></span><br><span class="line">- **ISR**：In - Sync - Replicas</span><br><span class="line"></span><br><span class="line">  - **可用副本：Leader与所有正在与Leader同步的Follower副本**</span><br><span class="line"></span><br><span class="line">- OSR：Out - Sync - Replicas</span><br><span class="line"></span><br><span class="line">  - 不可用副本：与Leader副本的同步差距很大，成为一个OSR列表的不可用副本</span><br><span class="line"></span><br><span class="line">  - 原因：网路故障等外部环境因素，某个副本与Leader副本的数据差异性很大</span><br><span class="line"></span><br><span class="line">  - 判断是否是一个OSR副本？</span><br><span class="line"></span><br><span class="line">    - 按照时间来判断</span><br><span class="line"></span><br><span class="line">    - &#96;&#96;&#96;sh</span><br><span class="line">      replica.lag.time.max.ms &#x3D; 10000   #可用副本的同步超时时间</span><br></pre></td></tr></table></div></figure>
+</code></pre>
+</li>
+</ol>
+</li>
+</ol>
+
+        <h3 id="3-8-Kafka数据同步概念：HW、LEO"   >
+          <a href="#3-8-Kafka数据同步概念：HW、LEO" class="heading-link"><i class="fas fa-link"></i></a>3.8 Kafka数据同步概念：HW、LEO</h3>
+      <ul>
+<li>HW：所有副本都同步的位置，消费者可以消费到的位置</li>
+<li>LEO：leader当前最新的位置</li>
+</ul>
+<p><img src="/images/image-20220218175747428.png" alt="image-20220218175747428"></p>
+
+        <h2 id="4-Kafka-Questions"   >
+          <a href="#4-Kafka-Questions" class="heading-link"><i class="fas fa-link"></i></a>4. Kafka Questions</h2>
+      
+        <h3 id="4-1-请简述Kafka生产数据时如何保证生产数据不丢失？"   >
+          <a href="#4-1-请简述Kafka生产数据时如何保证生产数据不丢失？" class="heading-link"><i class="fas fa-link"></i></a>4.1 请简述Kafka生产数据时如何保证生产数据不丢失？</h3>
+      <ol>
+<li><p>acks：<strong>返回的确认</strong>，当接收方收到数据以后，就会返回一个确认的消息</p>
+<p>生产者向Kafka生产数据，根据配置要求Kafka返回ACK</p>
+</li>
+<li><p>ack=0：生产者不管Kafka有没有收到，直接发送下一条</p>
+<ol>
+<li>优点：快</li>
+<li>缺点：<strong>容易导致数据丢失，概率比较高</strong></li>
+</ol>
+</li>
+<li><p>ack=1：生产者将数据发送给Kafka，Kafka等待这个分区leader副本写入成功，返回ack确认，生产者发送下一条</p>
+<ol>
+<li>优点：性能和安全上做了平衡</li>
+<li>缺点：依旧存在数据丢失的概率，但是概率比较小</li>
+</ol>
+</li>
+<li><p>ack=<strong>all/-1：</strong>生产者将数据发送给Kafka，Kafka等待这个分区<strong>所有副本全部写入</strong>，返回ack确认，生产者发送下一条</p>
+<ol>
+<li>优点：数据安全</li>
+<li>缺点：慢</li>
+<li>方案：搭配min.insync.replicas来使用<ul>
+<li>min.insync.replicas：表示最少同步几个副本就可以返回ack</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><p>如果Kafka没有返回ACK怎么办？</p>
+<ol>
+<li>生产者会等待Kafka返回ACK，有一个超时时间，如果Kafka在规定时间内没有返回ACK，说明数据丢失了</li>
+<li><strong>生产者有重试机制</strong>，重新发送这条数据给Kafka</li>
+<li>问题：如果ack在中途丢失，Kafkahi导致数据重复问题，怎么解决？</li>
+</ol>
+</li>
+</ol>
+
+        <h3 id="4-2-常见的生产数据分区规则？"   >
+          <a href="#4-2-常见的生产数据分区规则？" class="heading-link"><i class="fas fa-link"></i></a>4.2 常见的生产数据分区规则？</h3>
+      <ul>
+<li><p>MapReduce：Hash分区</p>
+<ul>
+<li>优点：相同的Key会进入同一个分区</li>
+<li>缺点：数据倾斜的问题，<strong>如果所有Key的Hash取余的结果一样，导致数据分配不均衡的问题</strong></li>
+</ul>
+</li>
+<li><p>Hbase：范围分区</p>
+</li>
+<li><p><strong>轮询分区（kafka2.x之前，当不指定分区策略时，采用此分区规则）</strong></p>
+<ul>
+<li>优点：数据分配更加均衡</li>
+<li>缺点：相同Key的数据进入不同的分区中</li>
+</ul>
+</li>
+<li><p>随机分区</p>
+</li>
+<li><p>槽位分区</p>
+</li>
+</ul>
+
+        <h3 id="4-3-Kafka生产数据的分区规则？"   >
+          <a href="#4-3-Kafka生产数据的分区规则？" class="heading-link"><i class="fas fa-link"></i></a>4.3  Kafka生产数据的分区规则？</h3>
+      <blockquote>
+<p><strong>重点理解</strong>：为什么生产数据的方式不同，分区的规则就不一样？</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ProducerRecord（Topic，Value）<span class="comment">//只指定topic和数据</span></span><br><span class="line">ProducerRecord（Topic，Key，Value）<span class="comment">//指定了key</span></span><br><span class="line">ProducerRecord（Topic，Partition，Key，Value）<span class="comment">//指定了Partiotion、key</span></span><br></pre></td></tr></table></div></figure>
+</blockquote>
+<p>流程：</p>
+<ol>
+<li><p>先判断是否指定了分区    </p>
+<p>如果指定了分区：</p>
+<p><img src="/images/13611dbe571bac3381b433ccd04e0741.png" alt="image-20210331090404644"></p>
+<p>如果没指定分区：</p>
+<p><img src="/images/67ff4cec7b48200efec1440d7ca5f8fa.png" alt="image-20210331090558530"></p>
+<p>默认调用的是<strong>DefaultPartitioner分区器中partition</strong>这个方法：</p>
+<p><img src="/images/4df2fe09a60f80f6ccffa2c4afa9bb2b.png" alt="image-20210331090803709"></p>
+</li>
+<li><p>再判断是否给定了Key：</p>
+<ol>
+<li>如果指定了key，按照Key的Hash取余分区的个数，来写入对应的分区</li>
+<li>如果没有指定Key：<ul>
+<li>2.X之前采用<strong>轮询分区</strong>，则将过来的数据每条依次与partition创建连接欸，并均匀的发送到每个partition中<ul>
+<li>优点：数据分配相对均衡</li>
+<li>缺点：性能非常差</li>
+</ul>
+</li>
+<li>2.X之后，采用<strong>粘性分区</strong><ul>
+<li>让数据尽量的更加均衡，实现少批次多数据</li>
+<li>第一次：将所有数据随机选择一个分区，全部写入这个分区中，将这次的分区编号放入缓存中</li>
+<li>第二次开始根据缓存中是否有上一次的编号，有：直接使用上一次的编号，如果没有：重新随机选择一个</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ol>
+
+        <h3 id="4-4-如何自定义分区策略"   >
+          <a href="#4-4-如何自定义分区策略" class="heading-link"><i class="fas fa-link"></i></a>4.4 如何自定义分区策略</h3>
+      <p>通过自定义开发分区器</p>
+<ul>
+<li>step1：构建一个类实现Partitioner接口</li>
+<li>step2：实现partition方法：定义分区逻辑</li>
+<li>step3：加载指定分区器即可</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> bigdata.itcast.cn.kafka.partition;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserPartition</span> <span class="keyword">implements</span> <span class="title">Partitioner</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 返回这条数据对应的分区编号</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> topic：Topic的名</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key：key的值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> keyBytes：key的字节</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> value：value的值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> valueBytes：value的字节</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> cluster：集群对象</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(String topic, Object key, <span class="keyword">byte</span>[] keyBytes, Object value, <span class="keyword">byte</span>[] valueBytes, Cluster cluster)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//获取Topic的分区数</span></span><br><span class="line">        Integer count = cluster.partitionCountForTopic(topic);</span><br><span class="line">        <span class="comment">//构建一个随机对象</span></span><br><span class="line">        Random random = <span class="keyword">new</span> Random();</span><br><span class="line">        <span class="comment">//随机得到一个分区编号</span></span><br><span class="line">        <span class="keyword">int</span> part = random.nextInt(count);</span><br><span class="line">        <span class="keyword">return</span> part;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//释放资源</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(Map&lt;String, ?&gt; configs)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//获取配置</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<p>使用分区器：</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//指定分区器的类</span></span><br><span class="line">props.put(<span class="string">&quot;partitioner.class&quot;</span>,<span class="string">&quot;bigdata.itcast.cn.kafka.partition.UserPartition&quot;</span>);</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h3 id="4-5-消费者消费过程及问题"   >
+          <a href="#4-5-消费者消费过程及问题" class="heading-link"><i class="fas fa-link"></i></a>4.5  消费者消费过程及问题</h3>
+      <ol>
+<li>消费者的数据消费规则<ol>
+<li>消费者消费Kafka中的Topic根据Offset进行消费，<strong>每次从上一次的位置继续消费</strong></li>
+<li>第一次消费规则：由属性决定<code>auto.offset.reset</code><ul>
+<li>latest：默认的值，从Topic每个分区的最新的位置开始消费</li>
+<li>earliest：从最早的位置开始消费，每个分区的offset为0开始消费</li>
+</ul>
+</li>
+<li>第二次消费开始：根据上一次消费的Offset位置+1继续进行消费</li>
+</ol>
+</li>
+<li>消费者如何知道上一次消费的位置是什么？<ol>
+<li>每个消费者都将自己上一次消费的offset记录自己的内存中</li>
+</ol>
+</li>
+<li>如果因为网络资源原因，<strong>消费者故障了</strong>，重启消费者，原来内存中offset就没有了，消费者消费的时候<strong>怎么知道上一次消费的位置？</strong></li>
+</ol>
+
+        <h3 id="4-6-Kafka-Offset偏移量管理"   >
+          <a href="#4-6-Kafka-Offset偏移量管理" class="heading-link"><i class="fas fa-link"></i></a>4.6 Kafka Offset偏移量管理</h3>
+      <ul>
+<li><p>Kafka将每个消费者消费的位置主动记录在一个Topic中：<strong>__consumer_offsets</strong></p>
+</li>
+<li><p>如果下次消费者没有给定请求offset，kafka就<strong>根据自己记录的offset来提供消费的位置</strong></p>
+</li>
+<li><p>offset的提交规则：</p>
+<ul>
+<li><p>根据时间自动提交</p>
+</li>
+<li><pre><code class="java">props.setProperty(&quot;enable.auto.commit&quot;, &quot;true&quot;);//是否自动提交offset
+props.setProperty(&quot;auto.commit.interval.ms&quot;, &quot;1000&quot;);//提交的间隔时间
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">![img](&#x2F;images&#x2F;53ffc0a0725ceb4b017d06ed26e66052.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 4.7 自动提交Offset的问题</span><br><span class="line"></span><br><span class="line">- 自动提交的规则</span><br><span class="line"></span><br><span class="line">  - 根据时间周期来提交下一次要消费的offset</span><br><span class="line"></span><br><span class="line">  - &#96;&#96;&#96;java</span><br><span class="line">    props.setProperty(&quot;enable.auto.commit&quot;, &quot;true&quot;);&#x2F;&#x2F;是否自动提交offset</span><br><span class="line">    props.setProperty(&quot;auto.commit.interval.ms&quot;, &quot;1000&quot;);&#x2F;&#x2F;提交的间隔时间</span><br></pre></td></tr></table></div></figure></code></pre>
+</li>
+</ul>
+</li>
+<li><p>数据丢失的情况</p>
+<ol>
+<li>如果刚消费，还没处理，就达到提交周期，记录了当前 的offset</li>
+<li>最后处理失败，需要重启，重新消费处理</li>
+<li>Kafka中已经记录消费过了，从上次消费的后面进行消费，出现部分数据丢失</li>
+</ol>
+</li>
+<li><p>数据重复的情况</p>
+<ol>
+<li>如果消费并处理成功，但是没有提交offset，程序故障</li>
+<li>重启以后，kafka中记录的还是之前的offset，重新又消费一遍</li>
+<li>数据出现重复问题</li>
+</ol>
+</li>
+</ul>
+<p><strong>结论：消费是否成功，是根据处理的结果来决定的</strong>，如果蛋蛋依赖kafka自动提交offset是根据时间周期来决定的，不可靠，所以：根据处理的结果来决定是否提交offse，要使用手动的方式来提交offset。</p>
+<ul>
+<li><strong>如果消费并处理成功：提交offset</strong></li>
+<li><strong>如果消费处理失败：不提交offset</strong></li>
+</ul>
+
+        <h3 id="4-8-实现手动提交Topic的Offset"   >
+          <a href="#4-8-实现手动提交Topic的Offset" class="heading-link"><i class="fas fa-link"></i></a>4.8 实现手动提交Topic的Offset</h3>
+      <ol>
+<li><p>关闭自动提交</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> props.setProperty(<span class="string">&quot;enable.auto.commit&quot;</span>, <span class="string">&quot;false&quot;</span>);<span class="comment">//是否自动提交offset</span></span><br><span class="line"><span class="comment">//props.setProperty(&quot;auto.commit.interval.ms&quot;, &quot;1000&quot;);//提交的间隔时间</span></span><br></pre></td></tr></table></div></figure>
+</li>
+<li><p>根据处理的结果来实现手动提交Offset，如果成功以后，再提交</p>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//相应的逻辑处理完成后，手动提交offset</span></span><br><span class="line">consumer.commitSync();</span><br></pre></td></tr></table></div></figure>
+
+
+
+</li>
+</ol>
+
+        <h3 id="4-9-手动提交Offset的问题"   >
+          <a href="#4-9-手动提交Offset的问题" class="heading-link"><i class="fas fa-link"></i></a>4.9 手动提交Offset的问题</h3>
+      <ol>
+<li>Offset是什么级别的？<ol>
+<li>Offset是分区级别，每个分区单独管理一套offset</li>
+</ol>
+</li>
+<li>手动提交Topic Offset的过程中会出现数据重复？<ol>
+<li>如果一个消费者，消费一个Topic，Topic有三个分区，当part0和part1都处理成功，<strong>当处理part2时候，程序故障</strong></li>
+<li>此时如果程序使用的是<code>consumer.commitSync();</code>来提交offset的话，就会出现问题了，因为刚才在三个分区还没有全部处理完，还没有触发<code>consumer.commitSync();</code>的执行。但是分区1和2的数据已经成功消费处理了。</li>
+<li>下次重新启动consumer的时候就会<strong>导致0和1分区的数据重复消费</strong></li>
+<li><strong>原因：Offset是分区级别的，提交offset是按照整个Topic级别来提交的</strong></li>
+<li><strong>解决：</strong><ol>
+<li>提交offset的时候，<strong>按照分区来提交</strong></li>
+<li>消费成功一个分区，就提交一个分区的offset</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+
+        <h3 id="4-10-手动提交分区Offset的实现"   >
+          <a href="#4-10-手动提交分区Offset的实现" class="heading-link"><i class="fas fa-link"></i></a>4.10 手动提交分区Offset的实现</h3>
+      <ul>
+<li>step1：消费每个分区的数据</li>
+<li>step2：处理输出每个分区的数据</li>
+<li>step3：手动提交每个分区的Offset</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//取出每个Partition的数据</span></span><br><span class="line"><span class="keyword">for</span> (TopicPartition partition : partitions) &#123;</span><br><span class="line">    <span class="comment">//将这个partition的数据从records中取出</span></span><br><span class="line">    List&lt;ConsumerRecord&lt;String, String&gt;&gt; partRecords = records.records(partition);</span><br><span class="line">    <span class="comment">//遍历这个分区的每一条数据</span></span><br><span class="line">    <span class="comment">//取出每一条数据</span></span><br><span class="line">    <span class="keyword">long</span> offset = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (ConsumerRecord&lt;String, String&gt; record : partRecords) &#123;</span><br><span class="line">        <span class="comment">//获取topic</span></span><br><span class="line">        String topic = record.topic();</span><br><span class="line">        <span class="comment">//获取分区</span></span><br><span class="line">        <span class="keyword">int</span> part= record.partition();</span><br><span class="line">        <span class="comment">//获取offset</span></span><br><span class="line">        offset = record.offset();</span><br><span class="line">        <span class="comment">//获取Key</span></span><br><span class="line">        String key = record.key();</span><br><span class="line">        <span class="comment">//获取Value</span></span><br><span class="line">        String value = record.value();</span><br><span class="line">        System.out.println(topic+<span class="string">&quot;\t&quot;</span>+part+<span class="string">&quot;\t&quot;</span>+offset+<span class="string">&quot;\t&quot;</span>+key+<span class="string">&quot;\t&quot;</span>+value);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//分区数据处理结束，提交分区的offset</span></span><br><span class="line">    Map&lt;TopicPartition, OffsetAndMetadata&gt; offsets = Collections.singletonMap(partition,<span class="keyword">new</span> OffsetAndMetadata(offset+<span class="number">1</span>));</span><br><span class="line">    consumer.commitSync(offsets);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<ul>
+<li>注意：工作中：一般不将Offset由Kafka存储，一般自己存储<ul>
+<li>如果处理成功：将offset存储在MySQL或者Redis中</li>
+<li>如果重启程序：从MySQL或者Redis读取上一次的offset来实现</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="4-11-指定消费Topic分区的数据"   >
+          <a href="#4-11-指定消费Topic分区的数据" class="heading-link"><i class="fas fa-link"></i></a>4.11 指定消费Topic分区的数据</h3>
+      <ul>
+<li>step1：构建Topic分区对象</li>
+<li>step2：指定消费Topic的分区</li>
+<li>step3：输出消费结果</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构建分区对象</span></span><br><span class="line">TopicPartition part0 = <span class="keyword">new</span> TopicPartition(<span class="string">&quot;bigdata01&quot;</span>, <span class="number">0</span>);</span><br><span class="line">TopicPartition part1 = <span class="keyword">new</span> TopicPartition(<span class="string">&quot;bigdata01&quot;</span>, <span class="number">1</span>);</span><br><span class="line"><span class="comment">//指定消费某些分区的数据</span></span><br><span class="line">consumer.assign(Arrays.asList(part0,part1));</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h3 id="4-12-消费的基本规则"   >
+          <a href="#4-12-消费的基本规则" class="heading-link"><i class="fas fa-link"></i></a>4.12 消费的基本规则</h3>
+      <ul>
+<li><strong>一个分区只能由消费者组中的一个消费者来消费</strong>，不同消费者组之间互不影响，但是拿到的是同一份数据</li>
+<li><strong>一个消费者组下面的一个消费者可以消费多个分区的数据，但是多个消费者不能同时消费一个分区</strong>，因为要保证一个消费者组得到的是一份数据，不然消费到的数据会重复，倘若同一消费者组的多个消费者同时读取同一个分区，无论是kafka维护偏移量还是客户端维护偏移量，都会造成数据的不一致，因为各个消费者对数据的消费处理速度是不同的。</li>
+<li>一般情况下：<strong>消费者数量⩾分区数量</strong>，或者消费者的数量是分区数量的倍数</li>
+</ul>
+
+        <h3 id="4-13-kafka的消费分配策略"   >
+          <a href="#4-13-kafka的消费分配策略" class="heading-link"><i class="fas fa-link"></i></a>4.13 kafka的消费分配策略</h3>
+      <ul>
+<li><p><strong>RangeAssignor（范围分配策略）</strong></p>
+<ul>
+<li><p>Kafka中默认的分配规则</p>
+</li>
+<li><p>每个消费者消费一定范围的分区，尽量的实现将分区均分给不同的消费者，<strong>如果不能均分，优先将分区分配给编号小的消费者</strong></p>
+<figure class="highlight plain"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">6个分区：part0 ~ part5</span><br><span class="line">2个消费者时：</span><br><span class="line">C1：part0 ~ part2</span><br><span class="line">C2：part3 ~ part5</span><br><span class="line">4个消费者时：</span><br><span class="line">C1：part0 part1</span><br><span class="line">C2：part2 part3</span><br><span class="line">C3：part4</span><br><span class="line">C4：part5</span><br></pre></td></tr></table></div></figure>
+</li>
+<li><p>范围分配优点：如果Topic的个数比较少，分配会相对比较均衡</p>
+</li>
+<li><p>范围分配缺点：<strong>如果Topic的个数比较多，而且不能均分，导致负载不均衡问题</strong></p>
+</li>
+<li><p>应用：Topic个数少或者每个Topic都均衡的场景</p>
+</li>
+</ul>
+</li>
+<li><p><strong>RoundRobinAssignor（轮询分配策略）</strong></p>
+<ul>
+<li>按照Topic的分区编号，轮询分配给每个消费者</li>
+<li>轮询分配的优点：如果有多个消费者，消费的Topic都是一样的，实现将所有Topic的所有分区轮询分配给所有消费者，尽量的实现负载的均衡<br>大多数的场景都是这种场景</li>
+<li>轮询分配的缺点：遇到消费者订阅的Topic是不一致的，不同的消费者订阅了不同Topic，只能基于订阅的消费者进行轮询分配，导致整体消费者负载不均衡的</li>
+<li>应用场景：所有消费者都订阅共同的Topic，能实现让所有Topic的分区轮询分配所有的消费者</li>
+</ul>
+</li>
+<li><p><strong>StickyAssignor（黏性分配策略）</strong></p>
+<ul>
+<li>轮询分配的规则<ul>
+<li>类似于轮询分配，尽量的将分区均衡的分配给消费者</li>
+</ul>
+</li>
+<li>黏性分配的特点<ul>
+<li>相对的保证的分配的均衡</li>
+<li><strong>如果某个消费者故障，要进行负载均衡的时候，会尽量的避免网络传输</strong></li>
+<li>尽量保证原来的消费的分区不变，将多出来分区均衡给剩余的消费者</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="4-14-kafka为什么快"   >
+          <a href="#4-14-kafka为什么快" class="heading-link"><i class="fas fa-link"></i></a>4.14 kafka为什么快</h3>
+      <ul>
+<li>partition <strong>并行处理</strong></li>
+<li><strong>顺序读写</strong>磁盘，充分利用磁盘特性</li>
+<li>利用了现代操作系统分页存储 <strong>Page Cache</strong> 来利用内存提高 I/O 效率</li>
+<li>采用了<strong>零拷贝技术</strong></li>
+<li>Producer 生产的数据持久化到 broker，采用 <strong>mmap 文件映射</strong>，实现顺序的快速写入</li>
+<li>Customer 从 broker 读取数据，采用 <strong>sendfile</strong>，将磁盘文件读到 OS 内核缓冲区后，转到 NIO buffer进行网络发送，减少 CPU 消耗</li>
+</ul>
+
+        <h3 id="4-15-消息队列的一次性语义"   >
+          <a href="#4-15-消息队列的一次性语义" class="heading-link"><i class="fas fa-link"></i></a>4.15 消息队列的一次性语义</h3>
+      <ul>
+<li>at-most-once：至多一次<ul>
+<li>会出现数据丢失的问题</li>
+</ul>
+</li>
+<li>at-least-once：至少一次<ul>
+<li>会出现数据重复的问题</li>
+</ul>
+</li>
+<li><strong>exactly-once：有且仅有一次</strong><ul>
+<li>只消费处理成功一次</li>
+<li>所有消息队列的目标</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="4-16-Kafka如何保证生产不丢失"   >
+          <a href="#4-16-Kafka如何保证生产不丢失" class="heading-link"><i class="fas fa-link"></i></a>4.16 Kafka如何保证生产不丢失</h3>
+      <ul>
+<li><strong>ACK + 重试机制</strong></li>
+<li>step1：生产数据时等待Kafka的ack</li>
+<li>step2：返回ack再生产下一条</li>
+</ul>
+
+        <h3 id="4-17-Kafka如何保证生产不重复"   >
+          <a href="#4-17-Kafka如何保证生产不重复" class="heading-link"><i class="fas fa-link"></i></a>4.17 Kafka如何保证生产不重复</h3>
+      <ul>
+<li>Kafka通过幂等性机制在数据中增加数据id，每条数据的数据id都不一致</li>
+<li>Kafka会判断每次要写入的id是否比上一次的id多1，如果多1，就写入，不多1，就直接返回ack</li>
+</ul>
+
+        <h3 id="4-18-Kafka保证消费一次性语义"   >
+          <a href="#4-18-Kafka保证消费一次性语义" class="heading-link"><i class="fas fa-link"></i></a>4.18 Kafka保证消费一次性语义</h3>
+      <p>通过自己手动管理存储Offset来实现</p>
+<ol>
+<li>step1：第一次消费根据属性进行消费</li>
+<li>step2：消费分区数据，处理分区数据</li>
+<li>step3：处理成功：将处理成功的分区的Offset进行额外的存储<ul>
+<li>Kafka：默认存储__consumer_offsets</li>
+<li>外部：MySQL、Redis、Zookeeper</li>
+</ul>
+</li>
+<li>step4：如果消费者故障，可以从外部存储读取上一次消费的offset向Kafka进行请求</li>
+</ol>
+
+        <h3 id="4-19-消息队列有什么好处？"   >
+          <a href="#4-19-消息队列有什么好处？" class="heading-link"><i class="fas fa-link"></i></a>4.19 消息队列有什么好处？</h3>
+      <ul>
+<li>实现解耦，将高耦合转换为低耦合</li>
+<li>通过异步并发，提高性能，并实现最终一致性</li>
+</ul>
+
+        <h3 id="4-20-Kafka中消费者与消费者组的关系是什么？"   >
+          <a href="#4-20-Kafka中消费者与消费者组的关系是什么？" class="heading-link"><i class="fas fa-link"></i></a>4.20 Kafka中消费者与消费者组的关系是什么？</h3>
+      <ul>
+<li>消费者组负责订阅Topic，消费者负责消费Topic分区的数据</li>
+<li>消费者组中可以包含多个消费者，多个消费者共同消费数据，增加消费并行度，提高消费性能</li>
+<li>消费者组的id由开发者指定，消费者的id由Kafka自动分配</li>
+</ul>
+
+        <h3 id="4-21-Kafka中Topic和Partition是什么，如何保证Partition数据安全？"   >
+          <a href="#4-21-Kafka中Topic和Partition是什么，如何保证Partition数据安全？" class="heading-link"><i class="fas fa-link"></i></a>4.21 Kafka中Topic和Partition是什么，如何保证Partition数据安全？</h3>
+      <ul>
+<li><p>Topic：逻辑上实现数据存储的分类，类似于数据库中的表概念</p>
+</li>
+<li><p>Partition：Topic中用于实现分布式存储的物理单元，一个Topic可以有多个分区</p>
+<ul>
+<li>每个分区可以存储在不同的节点，实现分布式存储</li>
+</ul>
+</li>
+<li><p>保证数据安全通过副本机制：Kafka中每个分区可以构建多个副本【副本个数 &lt;= 机器的个数】</p>
+<ul>
+<li><p>将一个分区的多个副本分为两种角色</p>
+</li>
+<li><p>leader副本：负责对外提供读写请求</p>
+</li>
+<li><p>follower副本：负责与leader同步数据，如果leader故障，follower要重新选举一个成为leader</p>
+</li>
+<li><p>选举：由Kafka Crontroller来决定谁是leader</p>
+</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="4-22-一个消费者组中有多个消费者，消费多个Topic多个分区，分区分配给消费者的分配规则有哪些？"   >
+          <a href="#4-22-一个消费者组中有多个消费者，消费多个Topic多个分区，分区分配给消费者的分配规则有哪些？" class="heading-link"><i class="fas fa-link"></i></a>4.22 一个消费者组中有多个消费者，消费多个Topic多个分区，分区分配给消费者的分配规则有哪些？</h3>
+      <ul>
+<li>分配场景<ul>
+<li>第一次消费：将分区分配给消费者</li>
+<li>负载均衡实现：在消费过程中，如果有部分消费者故障或者增加了新的消费</li>
+</ul>
+</li>
+<li>基本规则<ul>
+<li>一个分区只能被一个消费者所消费</li>
+<li>一个消费者可以消费多个分区</li>
+</ul>
+</li>
+<li>分配规则<ul>
+<li>范围分配<ul>
+<li>规则：每个消费者消费一定范围的分区，尽量均分，如果不能均分，优先分配给标号小的</li>
+<li>应用：消费比较少的Topic，或者多个Topic都能均分</li>
+</ul>
+</li>
+<li>轮询分配<ul>
+<li>规则：按照所有分区的编号进行顺序轮询分配</li>
+<li>应用：所有消费者消费的Topic都是一致的，能实现将所有分区轮询分配给所有消费者</li>
+</ul>
+</li>
+<li>黏性分配<ul>
+<li>规则：尽量保证分配的均衡，尽量避免网络的IO，如果出现故障，保证 每个消费者依旧消费原来的分区，将多出来的分区均分给剩下的消费者</li>
+<li>应用：建议使用分配规则</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        <h3 id="4-23-Kafka如何保证消费者消费数据不重复不丢失？"   >
+          <a href="#4-23-Kafka如何保证消费者消费数据不重复不丢失？" class="heading-link"><i class="fas fa-link"></i></a>4.23 Kafka如何保证消费者消费数据不重复不丢失？</h3>
+      <ul>
+<li>Kafka消费者通过Offset实现数据消费，只要保证各种场景下能正常实现Offset的记录即可</li>
+<li>保证消费数据不重复需要每次消费处理完成以后，将Offset存储在外部存储中，例如MySQL、Zookeeper、Redis中</li>
+<li>保证以消费分区、处理分区、记录分区的offset的顺序实现消费处理</li>
+<li>如果故障重启，只要从外部系统中读取上一次的Offset继续消费即可</li>
+</ul>
+
+        <h3 id="4-24-Kafka常用的API"   >
+          <a href="#4-24-Kafka常用的API" class="heading-link"><i class="fas fa-link"></i></a>4.24 Kafka常用的API</h3>
+      <p><strong>生产者API：生产数据到Kafka</strong></p>
+<ul>
+<li>step1：构建ProducerRecord对象</li>
+<li>step2：调用KafkaProducer的send方法将数据写入Kafka</li>
+</ul>
+<p><strong>消费者API：构建KafkaConsumer</strong></p>
+<ul>
+<li>step1：构建集群配置对象</li>
+<li>step2：构建Kafka Consumer对象</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//todo:1-构建连接，消费者对象</span></span><br><span class="line">Properties props = <span class="keyword">new</span> Properties();</span><br><span class="line">props.setProperty(<span class="string">&quot;bootstrap.servers&quot;</span>, <span class="string">&quot;node1:9092&quot;</span>);<span class="comment">//服务端地址</span></span><br><span class="line">props.setProperty(<span class="string">&quot;group.id&quot;</span>, <span class="string">&quot;test01&quot;</span>);<span class="comment">//消费者组的id</span></span><br><span class="line">props.setProperty(<span class="string">&quot;enable.auto.commit&quot;</span>, <span class="string">&quot;true&quot;</span>);<span class="comment">//是否自动提交offset</span></span><br><span class="line">props.setProperty(<span class="string">&quot;auto.commit.interval.ms&quot;</span>, <span class="string">&quot;1000&quot;</span>);<span class="comment">//提交的间隔时间</span></span><br><span class="line"><span class="comment">//指定key和value反序列化的类</span></span><br><span class="line">props.setProperty(<span class="string">&quot;key.deserializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span>);</span><br><span class="line">props.setProperty(<span class="string">&quot;value.deserializer&quot;</span>, <span class="string">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span>);</span><br><span class="line"></span><br><span class="line">KafkaConsumer&lt;String, String&gt; consumer = <span class="keyword">new</span> KafkaConsumer&lt;String, String&gt;(props);</span><br></pre></td></tr></table></div></figure>
+
+
+
+<p><strong>消费者API：消费Topic数据</strong></p>
+<ul>
+<li>step1：消费者订阅Topic</li>
+<li>step2：调用poll方法从Kafka中拉取数据，获取返回值</li>
+<li>step3：从返回值中输出：Topic、Partition、Offset、Key、Value</li>
+</ul>
+<figure class="highlight java"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//订阅Topic</span></span><br><span class="line">consumer.subscribe(Arrays.asList(<span class="string">&quot;bigdata01&quot;</span>));</span><br><span class="line"><span class="comment">//消费数据</span></span><br><span class="line">ConsumerRecords&lt;String, String&gt; records = consumer.poll(Duration.ofSeconds(<span class="number">1</span>));</span><br></pre></td></tr></table></div></figure>
+
+
+
+
+        <h3 id="4-25-Kafka常用的配置参数"   >
+          <a href="#4-25-Kafka常用的配置参数" class="heading-link"><i class="fas fa-link"></i></a>4.25 Kafka常用的配置参数</h3>
+      <p><img src="/images/image-20220218182648620.png" alt="image-20220218182648620"></p>
+<p><img src="/images/image-20220218182742652.png" alt="image-20220218182742652"></p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://www.weflink.cn">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/">https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://www.weflink.cn/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-next"><a class="paginator-next__link" href="/2022/02/21/%E6%8D%A2%E7%94%B5%E8%84%91%E6%80%8E%E4%B9%88%E6%9B%B4%E6%96%B0%E5%8D%9A%E5%AE%A2/"><span class="paginator-prev__text">使用hexo，如果换了电脑怎么更新博客</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="gitalk-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Kafka%E4%B8%93%E9%A2%98"><span class="toc-text">
+          Kafka专题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="toc-text">
+          1. 消息队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Kafka%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="toc-text">
+          2. Kafka的组件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-kafka%E7%9A%84%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-text">
+          2.1 kafka的架构图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-kafka%E7%9A%84Producer%E3%80%81Consumer%E3%80%81Consumer-Group%E3%80%81Broker"><span class="toc-text">
+          2.2 kafka的Producer、Consumer、Consumer Group、Broker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-kafka%E7%9A%84Topic%E3%80%81Partition%E3%80%81Replication"><span class="toc-text">
+          2.3 kafka的Topic、Partition、Replication</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-kafka%E7%9A%84Offset"><span class="toc-text">
+          2.4 kafka的Offset</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-kafka%E7%9A%84Segment"><span class="toc-text">
+          2.5 kafka的Segment</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Kafka%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">
+          3. Kafka的工作原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Kafka%E7%9A%84%E5%86%99%E5%85%A5%E8%BF%87%E7%A8%8B"><span class="toc-text">
+          3.1 Kafka的写入过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E4%B8%BA%E4%BB%80%E4%B9%88Kafka%E5%86%99%E5%85%A5%E9%80%9F%E5%BA%A6%E5%BE%88%E5%BF%AB%EF%BC%9F"><span class="toc-text">
+          3.2 为什么Kafka写入速度很快？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Kafka%E7%9A%84%E8%AF%BB%E5%8F%96%E8%BF%87%E7%A8%8B"><span class="toc-text">
+          3.3 Kafka的读取过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E4%B8%BA%E4%BB%80%E4%B9%88Kafka%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BE%88%E5%BF%AB%EF%BC%9F"><span class="toc-text">
+          3.4 为什么Kafka读取数据很快？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-Kafka%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%ADindex%E7%9A%84%E7%B4%A2%E5%BC%95%E8%AE%BE%E8%AE%A1"><span class="toc-text">
+          3.5 Kafka的存储中index的索引设计</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-8-Kafka%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%A6%82%E5%BF%B5%EF%BC%9AHW%E3%80%81LEO"><span class="toc-text">
+          3.8 Kafka数据同步概念：HW、LEO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-Kafka-Questions"><span class="toc-text">
+          4. Kafka Questions</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E8%AF%B7%E7%AE%80%E8%BF%B0Kafka%E7%94%9F%E4%BA%A7%E6%95%B0%E6%8D%AE%E6%97%B6%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%94%9F%E4%BA%A7%E6%95%B0%E6%8D%AE%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F"><span class="toc-text">
+          4.1 请简述Kafka生产数据时如何保证生产数据不丢失？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%B8%B8%E8%A7%81%E7%9A%84%E7%94%9F%E4%BA%A7%E6%95%B0%E6%8D%AE%E5%88%86%E5%8C%BA%E8%A7%84%E5%88%99%EF%BC%9F"><span class="toc-text">
+          4.2 常见的生产数据分区规则？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-Kafka%E7%94%9F%E4%BA%A7%E6%95%B0%E6%8D%AE%E7%9A%84%E5%88%86%E5%8C%BA%E8%A7%84%E5%88%99%EF%BC%9F"><span class="toc-text">
+          4.3  Kafka生产数据的分区规则？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E5%88%86%E5%8C%BA%E7%AD%96%E7%95%A5"><span class="toc-text">
+          4.4 如何自定义分区策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E6%B6%88%E8%B4%B9%E8%80%85%E6%B6%88%E8%B4%B9%E8%BF%87%E7%A8%8B%E5%8F%8A%E9%97%AE%E9%A2%98"><span class="toc-text">
+          4.5  消费者消费过程及问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-Kafka-Offset%E5%81%8F%E7%A7%BB%E9%87%8F%E7%AE%A1%E7%90%86"><span class="toc-text">
+          4.6 Kafka Offset偏移量管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-8-%E5%AE%9E%E7%8E%B0%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4Topic%E7%9A%84Offset"><span class="toc-text">
+          4.8 实现手动提交Topic的Offset</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-9-%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4Offset%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">
+          4.9 手动提交Offset的问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-10-%E6%89%8B%E5%8A%A8%E6%8F%90%E4%BA%A4%E5%88%86%E5%8C%BAOffset%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">
+          4.10 手动提交分区Offset的实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-11-%E6%8C%87%E5%AE%9A%E6%B6%88%E8%B4%B9Topic%E5%88%86%E5%8C%BA%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="toc-text">
+          4.11 指定消费Topic分区的数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-12-%E6%B6%88%E8%B4%B9%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%A7%84%E5%88%99"><span class="toc-text">
+          4.12 消费的基本规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-13-kafka%E7%9A%84%E6%B6%88%E8%B4%B9%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5"><span class="toc-text">
+          4.13 kafka的消费分配策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-14-kafka%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%AB"><span class="toc-text">
+          4.14 kafka为什么快</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-15-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E8%AF%AD%E4%B9%89"><span class="toc-text">
+          4.15 消息队列的一次性语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-16-Kafka%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%94%9F%E4%BA%A7%E4%B8%8D%E4%B8%A2%E5%A4%B1"><span class="toc-text">
+          4.16 Kafka如何保证生产不丢失</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-17-Kafka%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E7%94%9F%E4%BA%A7%E4%B8%8D%E9%87%8D%E5%A4%8D"><span class="toc-text">
+          4.17 Kafka如何保证生产不重复</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-18-Kafka%E4%BF%9D%E8%AF%81%E6%B6%88%E8%B4%B9%E4%B8%80%E6%AC%A1%E6%80%A7%E8%AF%AD%E4%B9%89"><span class="toc-text">
+          4.18 Kafka保证消费一次性语义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-19-%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E6%9C%89%E4%BB%80%E4%B9%88%E5%A5%BD%E5%A4%84%EF%BC%9F"><span class="toc-text">
+          4.19 消息队列有什么好处？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-20-Kafka%E4%B8%AD%E6%B6%88%E8%B4%B9%E8%80%85%E4%B8%8E%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E7%9A%84%E5%85%B3%E7%B3%BB%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">
+          4.20 Kafka中消费者与消费者组的关系是什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-21-Kafka%E4%B8%ADTopic%E5%92%8CPartition%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81Partition%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8%EF%BC%9F"><span class="toc-text">
+          4.21 Kafka中Topic和Partition是什么，如何保证Partition数据安全？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-22-%E4%B8%80%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84%E4%B8%AD%E6%9C%89%E5%A4%9A%E4%B8%AA%E6%B6%88%E8%B4%B9%E8%80%85%EF%BC%8C%E6%B6%88%E8%B4%B9%E5%A4%9A%E4%B8%AATopic%E5%A4%9A%E4%B8%AA%E5%88%86%E5%8C%BA%EF%BC%8C%E5%88%86%E5%8C%BA%E5%88%86%E9%85%8D%E7%BB%99%E6%B6%88%E8%B4%B9%E8%80%85%E7%9A%84%E5%88%86%E9%85%8D%E8%A7%84%E5%88%99%E6%9C%89%E5%93%AA%E4%BA%9B%EF%BC%9F"><span class="toc-text">
+          4.22 一个消费者组中有多个消费者，消费多个Topic多个分区，分区分配给消费者的分配规则有哪些？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-23-Kafka%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E6%B6%88%E8%B4%B9%E8%80%85%E6%B6%88%E8%B4%B9%E6%95%B0%E6%8D%AE%E4%B8%8D%E9%87%8D%E5%A4%8D%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F"><span class="toc-text">
+          4.23 Kafka如何保证消费者消费数据不重复不丢失？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-24-Kafka%E5%B8%B8%E7%94%A8%E7%9A%84API"><span class="toc-text">
+          4.24 Kafka常用的API</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-25-Kafka%E5%B8%B8%E7%94%A8%E7%9A%84%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0"><span class="toc-text">
+          4.25 Kafka常用的配置参数</span></a></li></ol></li></ol></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20210401145634365.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">17</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">5</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">9</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2022</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax@latest/pjax.min.js"></script><script>window.addEventListener('DOMContentLoaded', function () {
+  var pjax = new Pjax({"selectors":["head title","#main",".pjax-reload"],"history":true,"scrollTo":false,"scrollRestoration":false,"cacheBust":false,"debug":false,"currentUrlFullReload":false,"timeout":0});
+  // 加载进度条的计时器
+  var loadingTimer = null;
+
+  // 重置页面 Y 方向上的滚动偏移量
+  document.addEventListener('pjax:send', function () {
+    $('.header-nav-menu').removeClass('show');
+    if (CONFIG.pjax && CONFIG.pjax.avoidBanner) {
+      $('html').velocity('scroll', {
+        duration: 500,
+        offset: $('#header').height(),
+        easing: 'easeInOutCubic'
+      });
+    }
+
+    var loadingBarWidth = 20;
+    var MAX_LOADING_WIDTH = 95;
+
+    $('.loading-bar').addClass('loading');
+    $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    clearInterval(loadingTimer);
+    loadingTimer = setInterval(function () {
+      loadingBarWidth += 3;
+      if (loadingBarWidth > MAX_LOADING_WIDTH) {
+        loadingBarWidth = MAX_LOADING_WIDTH;
+      }
+      $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    }, 500);
+  }, false);
+
+  window.addEventListener('pjax:complete', function () {
+    clearInterval(loadingTimer);
+    $('.loading-bar__progress').css('width', '100%');
+    $('.loading-bar').removeClass('loading');
+    setTimeout(function () {
+      $('.loading-bar__progress').css('width', '0');
+    }, 400);
+    $('link[rel=prefetch], script[data-pjax-rm]').each(function () {
+      $(this).remove();
+    });
+    $('script[data-pjax], #pjax-reload script').each(function () {
+      $(this).parent().append($(this).remove());
+    });
+
+    if (Stun.utils.pjaxReloadBoot) {
+      Stun.utils.pjaxReloadBoot();
+    }
+    if (Stun.utils.pjaxReloadScroll) {
+      Stun.utils.pjaxReloadScroll();
+    }
+    if (Stun.utils.pjaxReloadSidebar) {
+      Stun.utils.pjaxReloadSidebar();
+    }
+    if (false) {
+      if (Stun.utils.pjaxReloadHeader) {
+        Stun.utils.pjaxReloadHeader();
+      }
+      if (Stun.utils.pjaxReloadScrollIcon) {
+        Stun.utils.pjaxReloadScrollIcon();
+      }
+      if (Stun.utils.pjaxReloadLocalSearch) {
+        Stun.utils.pjaxReloadLocalSearch();
+      }
+    }
+  }, false);
+}, false);</script><div id="pjax-reload"></div><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js" data-pjax=""></script><script src="https://cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js" data-pjax=""></script><script data-pjax="">function loadGitalk () {
+  if (!document.getElementById('gitalk-container')) {
+    return;
+  }
+
+  var gitalk = new Gitalk({
+    id: md5(window.location.pathname.slice(1)),
+    clientID: 'fbfd847f3a3ecae8a5e2',
+    clientSecret: '7efe5ae2536a38793d8bedfa0e65f03f205ab393',
+    repo: 'licsman.github.io',
+    owner: 'licsman',
+    admin: ['licsman'],
+    distractionFreeMode: 'true',
+    language: 'zh-CN'
+  });
+  gitalk.render('gitalk-container');
+}
+
+if (true) {
+  loadGitalk();
+} else {
+  window.addEventListener('DOMContentLoaded', loadGitalk, false);
+}</script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>

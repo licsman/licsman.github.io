@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="format-detection" content="telephone=no"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="icon" href="/images/icons/favicon-16x16.png?v=2.1.1" type="image/png" sizes="16x16"><link rel="icon" href="/images/icons/favicon-32x32.png?v=2.1.1" type="image/png" sizes="32x32"><meta name="msvalidate.01" content="A98DE9CE424AC8B232E7D714E0690DB4"><meta name="baidu-site-verification" content="code-RCHdFx39LC"><meta name="description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Exactly_Once到底是什么-Ⅱ">
+<meta property="og:url" content="https://www.weflink.cn/2021/03/17/Exactly-Once%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88-%E2%85%A1/index.html">
+<meta property="og:site_name" content="We Learn Flink">
+<meta property="og:description" content="深入理解Flinknk_end-to-endndnd_exactly-once语义">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317183727771.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317183854453.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317184040852.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317184142695.png">
+<meta property="og:image" content="https://www.weflink.cn/images/image-20210317184251890.png">
+<meta property="article:published_time" content="2021-03-17T10:33:51.000Z">
+<meta property="article:modified_time" content="2021-03-18T02:16:09.249Z">
+<meta property="article:author" content="Jiawei Miao">
+<meta property="article:tag" content="flink">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.weflink.cn/images/image-20210317183727771.png"><title>Exactly_Once到底是什么-Ⅱ | We Learn Flink</title><link ref="canonical" href="https://www.weflink.cn/2021/03/17/Exactly-Once%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88-%E2%85%A1/"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.1/css/all.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.css" type="text/css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" type="text/css"><link rel="stylesheet" href="/css/index.css?v=2.1.1"><script>var Stun = window.Stun || {};
+var CONFIG = {
+  root: '/',
+  algolia: undefined,
+  fontIcon: {"prompt":{"success":"fas fa-check-circle","info":"fas fa-arrow-circle-right","warning":"fas fa-exclamation-circle","error":"fas fa-times-circle"},"copyBtn":"fas fa-copy"},
+  sidebar: {"offsetTop":"20px","tocMaxDepth":6},
+  header: {"enable":true,"showOnPost":true,"scrollDownIcon":true},
+  postWidget: {"endText":true},
+  nightMode: {"enable":true},
+  back2top: {"enable":true},
+  codeblock: {"style":"default","highlight":"light","wordWrap":false},
+  reward: false,
+  fancybox: false,
+  zoomImage: {"gapAside":"20px"},
+  galleryWaterfall: undefined,
+  lazyload: false,
+  pjax: {"avoidBanner":true},
+  externalLink: {"icon":{"enable":true,"name":"fas fa-external-link-alt"}},
+  shortcuts: undefined,
+  prompt: {"copyButton":"复制","copySuccess":"复制成功","copyError":"复制失败"},
+  sourcePath: {"js":"js","css":"css","images":"images"},
+};
+
+window.CONFIG = CONFIG;</script><meta name="generator" content="Hexo 5.2.0"></head><body><div class="container" id="container"><header class="header" id="header"><div class="header-inner"><nav class="header-nav header-nav--fixed"><div class="header-nav-inner"><div class="header-nav-menubtn"><i class="fas fa-bars"></i></div><div class="header-nav-menu"><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/"><span class="header-nav-menu-item__icon"><i class="fas fa-home"></i></span><span class="header-nav-menu-item__text">首页</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/archives/"><span class="header-nav-menu-item__icon"><i class="fas fa-folder-open"></i></span><span class="header-nav-menu-item__text">归档</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/categories/"><span class="header-nav-menu-item__icon"><i class="fas fa-layer-group"></i></span><span class="header-nav-menu-item__text">分类</span></a></div><div class="header-nav-menu-item"><a class="header-nav-menu-item__link" href="/tags/"><span class="header-nav-menu-item__icon"><i class="fas fa-tags"></i></span><span class="header-nav-menu-item__text">标签</span></a></div></div><div class="header-nav-mode"><div class="mode"><div class="mode-track"><span class="mode-track-moon"></span><span class="mode-track-sun"></span></div><div class="mode-thumb"></div></div></div></div></nav><div class="header-banner"><div class="header-banner-info"><div class="header-banner-info__title">We Learn Flink</div><div class="header-banner-info__subtitle">Nothing is impossible !</div></div><div class="header-banner-arrow"><div class="header-banner-arrow__icon"><i class="fas fa-angle-down"></i></div></div></div></div></header><main class="main" id="main"><div class="main-inner"><div class="content-wrap" id="content-wrap"><div class="content" id="content"><!-- Just used to judge whether it is an article page--><div id="is-post"></div><div class="post"><header class="post-header"><h1 class="post-title">Exactly_Once到底是什么-Ⅱ</h1><div class="post-meta"><span class="post-meta-item post-meta-item--createtime"><span class="post-meta-item__icon"><i class="far fa-calendar-plus"></i></span><span class="post-meta-item__info">发表于</span><span class="post-meta-item__value">2021-03-17</span></span><span class="post-meta-item post-meta-item--updatetime"><span class="post-meta-item__icon"><i class="far fa-calendar-check"></i></span><span class="post-meta-item__info">更新于</span><span class="post-meta-item__value">2021-03-18</span></span><span class="post-meta-item post-meta-item--wordcount"><span class="post-meta-item__icon"><i class="far fa-file-word"></i></span><span class="post-meta-item__info">字数统计</span><span class="post-meta-item__value">3.5k</span></span><span class="post-meta-item post-meta-item--readtime"><span class="post-meta-item__icon"><i class="far fa-clock"></i></span><span class="post-meta-item__info">阅读时长</span><span class="post-meta-item__value">18分</span></span></div></header><div class="post-body"><p>分布式事件流处理正逐渐成为大数据领域中一个热门话题。著名的流处理引擎（Streaming Processing Engines， SPEs）包括Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及Apache Spark（Spark Streaming）。流处理引擎中一个著名的且经常被广泛讨论的特征是它们的处理语义，而“exactly-once”是其中最受欢迎的，同时也有很多引擎声称它们提供“exactly-once”处理语义。</p>
+<a id="more"></a>
+
+<p>然而，围绕着“exactly-once”究竟是什么、它牵扯到什么以及当流处理引擎声称提供“exactly-once”语义时它究竟意味着什么，仍然存在着很多误解与歧义。而用来描述处理语义的“exactly-once”这一标签同样也是非常误导人的。在这篇博文当中，我将会讨论众多受欢迎的引擎所提供的“exactly-once”语义间的不同之处，以及为什么“exactly-once”更好的描述是“effective-once”。我还会讨论用来实现“exactly-once”的常用技术间的权衡（tradeoffs）</p>
+
+        <h1 id="1-背景"   >
+          <a href="#1-背景" class="heading-link"><i class="fas fa-link"></i></a>1. 背景</h1>
+      <p>流处理（streaming process），有时也被称为事件处理（event processing），可以被简洁地描述为对于一个无限的数据或事件序列的连续处理。一个流，或事件，处理应用可以或多或少地由一个有向图，通常是一个有向无环图（DAG），来表达。在这样一个图中，每条边表示一个数据或事件流，而每个顶点表示使用应用定义好的逻辑来处理来自相邻边的数据或事件的算子。其中有两种特殊的顶点，通常被称作sources与sinks。Sources消费外部数据/事件并将其注入到应用当中，而sinks通常收集由应用产生的结果。图1描述了一个流处理应用的例子。</p>
+<p>A typical Heron processing topology</p>
+<p><img src="/images/image-20210317183727771.png" alt="image-20210317183727771"></p>
+<p>一个执行流/事件处理应用的流处理引擎通常允许用户制定一个可靠性模式或者处理语义，来标示引擎会为应用图的实体之间的数据处理提供什么样的保证。由于你总是会遇到网络、机器这些会导致数据丢失的故障，因而这些保证是有意义的。有三种模型/标签，at-most-once、at-least-once以及exactly-once，通常被用来描述流处理引擎应该为应用提供的数据处理语义。接下来是对这些不同的处理语义的宽泛的定义：</p>
+
+        <h1 id="2-常见的三种语义"   >
+          <a href="#2-常见的三种语义" class="heading-link"><i class="fas fa-link"></i></a>2. 常见的三种语义</h1>
+      
+        <h2 id="At-most-once"   >
+          <a href="#At-most-once" class="heading-link"><i class="fas fa-link"></i></a>At-most-once</h2>
+      <p>这实质上是一个“尽力而为”（best effort）的方法。数据或者事件被保证只会被应用中的所有算子最多处理一次。这就意味着对于流处理应用完全处理它之前丢失的数据，也不会有额外的重试或重传尝试。图2展示了一个相关的例子：</p>
+<p>At-most-once processing semantics</p>
+<p><img src="/images/image-20210317183854453.png" alt="image-20210317183854453"></p>
+
+        <h2 id="At-least-once"   >
+          <a href="#At-least-once" class="heading-link"><i class="fas fa-link"></i></a>At-least-once</h2>
+      <p>数据或事件被保证会被应用图中的所有算子都至少处理一次。这通常意味着当事件在被应用完全处理之前就丢失的话，其会被从source开始重放（replayed）或重传（retransmitted）。由于事件会被重传，那么一个事件有时就会被处理超过一次，也就是所谓的at-least-once。图3展示了一个at-least-once的例子。在这一示例中，第一个算子第一次处理一个事件时失败，之后在重试时成功，并在结果证明没有必要的第二次重试时成功。</p>
+<p>At-least-once processing semantics</p>
+<p><img src="/images/image-20210317184040852.png" alt="image-20210317184040852"></p>
+
+        <h2 id="Exactly-once"   >
+          <a href="#Exactly-once" class="heading-link"><i class="fas fa-link"></i></a>Exactly-once</h2>
+      <p>倘若发生各种故障，事件也会被确保只会被流应用中的所有算子“恰好”处理一次。拿来实现“exactly-once”的有两种受欢迎的典型机制：1. 分布式快照/状态检查点（checkpointing） 2. At-least-once的事件投递加上消息去重<br>用来实现“exactly-once”的分布式快照/状态检查点方法是受到了Chandy-Lamport分布式快照算法1的启发。在这种机制中，流处理应用中的每一个算子的所有状态都会周期性地checkpointed。倘若系统发生了故障，每一个算子的所有状态都会回滚到最近的全局一致的检查点处。在回滚过程中，所有的处理都会暂停。Sources也会根据最近的检查点重置到正确到offset。整个流处理应用基本上倒回到最近的一致性状态，处理也可以从这个状态重新开始。图4展示了这种机制的基本原理。</p>
+<p>Distributed snapshot</p>
+<p><img src="/images/image-20210317184142695.png" alt="image-20210317184142695"></p>
+<p>在图4中，流处理应用T1时在正常地工作，同时状态也被checkpointed。T2时，算子处理一个输入数据时失败了。此时，S = 4的状态已经保存到了持久化存储当中，而S = 12的状态仍然位于算子的内存当中。为了解决这个不一致，T3时processing graph倒回到S = 4的状态并“重放”流中的每一个状态直到最新的状态，并处理每一个数据。最终结果是虽然某些数据被处理了多次，但是无论执行了多少次回滚，结果状态依然是相同的。用来实现“exactly-once”的另一种方法是在每一个算子的基础上，将at-least-once的事件投递与事件去重相结合。使用这种方法的引擎会重放失败的事件以进一步尝试进行处理，并在每一个算子上，在事件进入到用户定义的逻辑之前删除重复的事件。这一机制需要为每一个算子维护一份事务日志（transaction log）来记录哪些事件已经处理过了。使用类似这一机制的引擎有Google的MillWheel2与Apache Kafka Streams。图5展示了这一机制的重点。</p>
+<p>At-least-once delivery plus deduplication</p>
+<p><img src="/images/image-20210317184251890.png" alt="image-20210317184251890"></p>
+
+        <h1 id="3-疑问"   >
+          <a href="#3-疑问" class="heading-link"><i class="fas fa-link"></i></a>3. 疑问</h1>
+      
+        <h2 id="exactly-once确实是exactly-once吗？"   >
+          <a href="#exactly-once确实是exactly-once吗？" class="heading-link"><i class="fas fa-link"></i></a>exactly-once确实是exactly-once吗？</h2>
+      <p>现在让我们重新审视『精确一次』处理语义真正对最终用户的保证。『精确一次』这个术语在描述正好处理一次时会让人产生误导。</p>
+<p>有些人可能认为『精确一次』描述了事件处理的保证，其中流中的每个事件只被处理一次。实际上，没有引擎能够保证正好只处理一次。在面对任意故障时，不可能保证每个算子中的用户定义逻辑在每个事件中只执行一次，因为用户代码被部分执行的可能性是永远存在的。<br>考虑具有流处理运算符的场景，该运算符执行打印传入事件的 ID 的映射操作，然后返回事件不变。下面的伪代码说明了这个操作：</p>
+<figure class="highlight python"><div class="table-container"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Map (Event event) &#123;</span><br><span class="line">    Print <span class="string">&quot;Event ID: &quot;</span> + event.getId()</span><br><span class="line">    Return event</span><br><span class="line">&#125;</span><br></pre></td></tr></table></div></figure>
+
+<p>每个事件都有一个 GUID (全局惟一ID)。如果用户逻辑的精确执行一次得到保证，那么事件 ID 将只输出一次。但是，这是无法保证的，因为在用户定义的逻辑的执行过程中，随时都可能发生故障。引擎无法自行确定执行用户定义的处理逻辑的时间点。因此，不能保证任意用户定义的逻辑只执行一次。这也意味着，在用户定义的逻辑中实现的外部操作(如写数据库)也不能保证只执行一次。此类操作仍然需要以幂等的方式执行。</p>
+<p>那么，当引擎声明『精确一次』处理语义时，它们能保证什么呢？如果不能保证用户逻辑只执行一次，那么什么逻辑只执行一次？当引擎声明『精确一次』处理语义时，它们实际上是在说，它们可以保证引擎管理的状态更新只提交一次到持久的后端存储。</p>
+<p>上面描述的两种机制都使用持久的后端存储作为真实性的来源，可以保存每个算子的状态并自动向其提交更新。对于机制 1 (分布式快照 / 状态检查点)，此持久后端状态用于保存流应用程序的全局一致状态检查点(每个算子的检查点状态)。对于机制 2 (至少一次事件传递加上重复数据删除)，持久后端状态用于存储每个算子的状态以及每个算子的事务日志，该日志跟踪它已经完全处理的所有事件。</p>
+<p>提交状态或对作为真实来源的持久后端应用更新可以被描述为恰好发生一次。然而，如上所述，计算状态的更新 / 更改，即处理在事件上执行任意用户定义逻辑的事件，如果发生故障，则可能不止一次地发生。换句话说，事件的处理可以发生多次，但是该处理的效果只在持久后端状态存储中反映一次。因此，我们认为有效地描述这些处理语义最好的术语是『有效一次』（effectively once）。</p>
+<p>那么，当引擎声明『精确一次』处理语义时，它们能保证什么呢？如果不能保证用户逻辑只执行一次，那么什么逻辑只执行一次？当引擎声明『精确一次』处理语义时，它们实际上是在说，它们可以保证引擎管理的状态更新只提交一次到持久的后端存储</p>
+
+        <h2 id="分布式快照-vs-at-least-once"   >
+          <a href="#分布式快照-vs-at-least-once" class="heading-link"><i class="fas fa-link"></i></a>分布式快照 vs at-least-once</h2>
+      <p>从语义的角度来看，分布式快照和至少一次事件传递以及重复数据删除机制都提供了相同的保证。然而，由于两种机制之间的实现差异，存在显着的性能差异。</p>
+<p>机制 1（分布式快照 / 状态检查点）的性能开销是最小的，因为引擎实际上是往流应用程序中的所有算子一起发送常规事件和特殊事件，而状态检查点可以在后台异步执行。但是，对于大型流应用程序，故障可能会更频繁地发生，导致引擎需要暂停应用程序并回滚所有算子的状态，这反过来又会影响性能。流式应用程序越大，故障发生的可能性就越大，因此也越频繁，反过来，流式应用程序的性能受到的影响也就越大。然而，这种机制是非侵入性的，运行时需要的额外资源影响很小。</p>
+<p>机制 2（至少一次事件传递加重复数据删除）可能需要更多资源，尤其是存储。使用此机制，引擎需要能够跟踪每个算子实例已完全处理的每个元组，以执行重复数据删除，以及为每个事件执行重复数据删除本身。这意味着需要跟踪大量的数据，尤其是在流应用程序很大或者有许多应用程序在运行的情况下。执行重复数据删除的每个算子上的每个事件都会产生性能开销。但是，使用这种机制，流应用程序的性能不太可能受到应用程序大小的影响。对于机制 1，如果任何算子发生故障，则需要发生全局暂停和状态回滚；对于机制 2，失败的影响更加局部性。当在算子中发生故障时，可能尚未完全处理的事件仅从上游源重放/重传。性能影响与流应用程序中发生故障的位置是隔离的，并且对流应用程序中其他算子的性能几乎没有影响。从性能角度来看，这两种机制的优缺点如下。</p>
+<p>分布式快照 / 状态检查点的优缺点：</p>
+<ul>
+<li>优点：<br>较小的性能和资源开销</li>
+<li>缺点：<br>对性能的影响较大<br>拓扑越大，对性能的潜在影响越大</li>
+</ul>
+<p>至少一次事件传递以及重复数据删除机制的优缺点：</p>
+<ul>
+<li>优点：<br>故障对性能的影响是局部的<br>故障的影响不一定会随着拓扑的大小而增加</li>
+<li>缺点：<br>可能需要大量的存储和基础设施来支持<br>每个算子的每个事件的性能开销</li>
+</ul>
+<p>虽然从理论上讲，分布式快照和至少一次事件传递加重复数据删除机制之间存在差异，但两者都可以简化为至少一次处理加幂等性。对于这两种机制，当发生故障时(至少实现一次)，事件将被重放/重传，并且通过状态回滚或事件重复数据删除，算子在更新内部管理状态时本质上是幂等的。</p>
+
+        <h1 id="4-总结"   >
+          <a href="#4-总结" class="heading-link"><i class="fas fa-link"></i></a>4. 总结</h1>
+      <p>在这篇博客文章中，我希望能够让你相信『精确一次』这个词是非常具有误导性的。提供『精确一次』的处理语义实际上意味着流处理引擎管理的算子状态的不同更新只反映一次。『精确一次』并不能保证事件的处理，即任意用户定义逻辑的执行，只会发生一次。我们更喜欢用『有效一次』（effectively once）这个术语来表示这种保证，因为处理不一定保证只发生一次，但是对引擎管理的状态的影响只反映一次。两种流行的机制，分布式快照和重复数据删除，被用来实现精确/有效的一次性处理语义。这两种机制为消息处理和状态更新提供了相同的语义保证，但是在性能上存在差异。这篇文章并不是要让你相信任何一种机制都优于另一种，因为它们各有利弊。</p>
+</div><footer class="post-footer"><div class="post-ending ending"><div class="ending__text">------ 本文结束，感谢您的阅读 ------</div></div><div class="post-copyright copyright"><div class="copyright-author"><span class="copyright-author__name">本文作者: </span><span class="copyright-author__value"><a href="https://www.weflink.cn">Jiawei Miao</a></span></div><div class="copyright-link"><span class="copyright-link__name">本文链接: </span><span class="copyright-link__value"><a href="https://www.weflink.cn/2021/03/17/Exactly-Once%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88-%E2%85%A1/">https://www.weflink.cn/2021/03/17/Exactly-Once%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88-%E2%85%A1/</a></span></div><div class="copyright-notice"><span class="copyright-notice__name">版权声明: </span><span class="copyright-notice__value">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" rel="external nofollow" target="_blank">BY-NC-SA</a> 许可协议。转载请注明出处！</span></div></div><div class="post-tags"><span class="post-tags-item"><span class="post-tags-item__icon"><i class="fas fa-tag"></i></span><a class="post-tags-item__link" href="https://www.weflink.cn/tags/flink/">flink</a></span></div><div class="post-share"><div class="social-share" data-sites="qzone, qq, weibo, wechat, douban, linkedin, facebook, twitter, google">Share to: </div></div><nav class="post-paginator paginator"><div class="paginator-prev"><a class="paginator-prev__link" href="/2021/03/18/%E4%BD%A0%E5%BF%85%E9%A1%BBGet%E7%9A%84%E5%BC%80%E6%BA%90CDC%E6%8A%80%E6%9C%AF%5BDebezium%5D/"><span class="paginator-prev__icon"><i class="fas fa-angle-left"></i></span><span class="paginator-prev__text">你必须Get的开源CDC技术[Debezium]</span></a></div><div class="paginator-next"><a class="paginator-next__link" href="/2021/03/17/Flink-SQL-CDC%E5%AE%9E%E8%B7%B5%E5%8F%8A%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%88%86%E6%9E%90/"><span class="paginator-prev__text">Flink-SQL-CDC实践及一致性的分析</span><span class="paginator-next__icon"><i class="fas fa-angle-right"></i></span></a></div></nav></footer></div></div><div class="comments" id="comments"><div id="gitalk-container"></div></div></div><div class="sidebar-wrap" id="sidebar-wrap"><aside class="sidebar" id="sidebar"><div class="sidebar-nav"><span class="sidebar-nav-toc current">文章目录</span><span class="sidebar-nav-ov">站点概览</span></div><section class="sidebar-toc"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF"><span class="toc-text">
+          1. 背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B8%B8%E8%A7%81%E7%9A%84%E4%B8%89%E7%A7%8D%E8%AF%AD%E4%B9%89"><span class="toc-text">
+          2. 常见的三种语义</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#At-most-once"><span class="toc-text">
+          At-most-once</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#At-least-once"><span class="toc-text">
+          At-least-once</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Exactly-once"><span class="toc-text">
+          Exactly-once</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%96%91%E9%97%AE"><span class="toc-text">
+          3. 疑问</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#exactly-once%E7%A1%AE%E5%AE%9E%E6%98%AFexactly-once%E5%90%97%EF%BC%9F"><span class="toc-text">
+          exactly-once确实是exactly-once吗？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E5%BF%AB%E7%85%A7-vs-at-least-once"><span class="toc-text">
+          分布式快照 vs at-least-once</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">
+          4. 总结</span></a></li></ol></section><!-- ov = overview--><section class="sidebar-ov hide"><div class="sidebar-ov-author"><div class="sidebar-ov-author__avatar"><img class="sidebar-ov-author__avatar_img" src="https://img-blog.csdnimg.cn/20210401145634365.jpg" alt="avatar"></div><p class="sidebar-ov-author__text">Nothing is impossible!</p></div><div class="sidebar-ov-social"><a class="sidebar-ov-social-item" href="https://github.com/licsman" target="_blank" rel="noopener" data-popover="Github" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-github"></i></span></a><a class="sidebar-ov-social-item" href="https://weibo.com/u/5858123623?is_all=1" target="_blank" rel="noopener" data-popover="微博" data-popover-pos="up"><span class="sidebar-ov-social-item__icon"><i class="fab fa-weibo"></i></span></a></div><div class="sidebar-ov-state"><a class="sidebar-ov-state-item sidebar-ov-state-item--posts" href="/archives/"><div class="sidebar-ov-state-item__count">17</div><div class="sidebar-ov-state-item__name">归档</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--categories" href="/categories/"><div class="sidebar-ov-state-item__count">5</div><div class="sidebar-ov-state-item__name">分类</div></a><a class="sidebar-ov-state-item sidebar-ov-state-item--tags" href="/tags/"><div class="sidebar-ov-state-item__count">9</div><div class="sidebar-ov-state-item__name">标签</div></a></div><div class="sidebar-ov-cc"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en" target="_blank" rel="noopener" data-popover="知识共享许可协议" data-popover-pos="up"><img src="/images/cc-by-nc-sa.svg"></a></div></section><div class="sidebar-reading"><div class="sidebar-reading-info"><span class="sidebar-reading-info__text">你已阅读了 </span><span class="sidebar-reading-info__num">0</span></div><div class="sidebar-reading-line"></div></div></aside></div><div class="clearfix"></div></div></main><footer class="footer" id="footer"><div class="footer-inner"><div><span>Copyright © 2022</span><span class="footer__icon"><i class="fas fa-heart"></i></span><span>Jiawei Miao</span></div><div><span>由 <a href="http://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a> 强力驱动</span><span> v5.2.0</span></div></div></footer><div class="loading-bar" id="loading-bar"><div class="loading-bar__progress"></div></div><div class="back2top" id="back2top"><span class="back2top__icon"><i class="fas fa-rocket"></i></span></div></div><script src="https://cdn.jsdelivr.net/npm/jquery@v3.4.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.min.js"></script><script src="https://cdn.jsdelivr.net/npm/velocity-animate@1.5.2/velocity.ui.min.js"></script><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax@latest/pjax.min.js"></script><script>window.addEventListener('DOMContentLoaded', function () {
+  var pjax = new Pjax({"selectors":["head title","#main",".pjax-reload"],"history":true,"scrollTo":false,"scrollRestoration":false,"cacheBust":false,"debug":false,"currentUrlFullReload":false,"timeout":0});
+  // 加载进度条的计时器
+  var loadingTimer = null;
+
+  // 重置页面 Y 方向上的滚动偏移量
+  document.addEventListener('pjax:send', function () {
+    $('.header-nav-menu').removeClass('show');
+    if (CONFIG.pjax && CONFIG.pjax.avoidBanner) {
+      $('html').velocity('scroll', {
+        duration: 500,
+        offset: $('#header').height(),
+        easing: 'easeInOutCubic'
+      });
+    }
+
+    var loadingBarWidth = 20;
+    var MAX_LOADING_WIDTH = 95;
+
+    $('.loading-bar').addClass('loading');
+    $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    clearInterval(loadingTimer);
+    loadingTimer = setInterval(function () {
+      loadingBarWidth += 3;
+      if (loadingBarWidth > MAX_LOADING_WIDTH) {
+        loadingBarWidth = MAX_LOADING_WIDTH;
+      }
+      $('.loading-bar__progress').css('width', loadingBarWidth + '%');
+    }, 500);
+  }, false);
+
+  window.addEventListener('pjax:complete', function () {
+    clearInterval(loadingTimer);
+    $('.loading-bar__progress').css('width', '100%');
+    $('.loading-bar').removeClass('loading');
+    setTimeout(function () {
+      $('.loading-bar__progress').css('width', '0');
+    }, 400);
+    $('link[rel=prefetch], script[data-pjax-rm]').each(function () {
+      $(this).remove();
+    });
+    $('script[data-pjax], #pjax-reload script').each(function () {
+      $(this).parent().append($(this).remove());
+    });
+
+    if (Stun.utils.pjaxReloadBoot) {
+      Stun.utils.pjaxReloadBoot();
+    }
+    if (Stun.utils.pjaxReloadScroll) {
+      Stun.utils.pjaxReloadScroll();
+    }
+    if (Stun.utils.pjaxReloadSidebar) {
+      Stun.utils.pjaxReloadSidebar();
+    }
+    if (false) {
+      if (Stun.utils.pjaxReloadHeader) {
+        Stun.utils.pjaxReloadHeader();
+      }
+      if (Stun.utils.pjaxReloadScrollIcon) {
+        Stun.utils.pjaxReloadScrollIcon();
+      }
+      if (Stun.utils.pjaxReloadLocalSearch) {
+        Stun.utils.pjaxReloadLocalSearch();
+      }
+    }
+  }, false);
+}, false);</script><div id="pjax-reload"></div><script src="https://cdn.jsdelivr.net/npm/gitalk@latest/dist/gitalk.min.js" data-pjax=""></script><script src="https://cdn.jsdelivr.net/npm/js-md5@latest/src/md5.min.js" data-pjax=""></script><script data-pjax="">function loadGitalk () {
+  if (!document.getElementById('gitalk-container')) {
+    return;
+  }
+
+  var gitalk = new Gitalk({
+    id: md5(window.location.pathname.slice(1)),
+    clientID: 'fbfd847f3a3ecae8a5e2',
+    clientSecret: '7efe5ae2536a38793d8bedfa0e65f03f205ab393',
+    repo: 'licsman.github.io',
+    owner: 'licsman',
+    admin: ['licsman'],
+    distractionFreeMode: 'true',
+    language: 'zh-CN'
+  });
+  gitalk.render('gitalk-container');
+}
+
+if (true) {
+  loadGitalk();
+} else {
+  window.addEventListener('DOMContentLoaded', loadGitalk, false);
+}</script><script src="/js/utils.js?v=2.1.1"></script><script src="/js/stun-boot.js?v=2.1.1"></script><script src="/js/scroll.js?v=2.1.1"></script><script src="/js/header.js?v=2.1.1"></script><script src="/js/sidebar.js?v=2.1.1"></script></body></html>
