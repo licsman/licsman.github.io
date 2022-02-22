@@ -2,16 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/</loc>
+    <loc>https://www.weflink.cn/2022/02/21/%E6%8D%A2%E7%94%B5%E8%84%91%E6%80%8E%E4%B9%88%E6%9B%B4%E6%96%B0%E5%8D%9A%E5%AE%A2/</loc>
     
-    <lastmod>2022-02-21</lastmod>
+    <lastmod>2022-02-22</lastmod>
     
   </url>
   
   <url>
-    <loc>https://www.weflink.cn/2022/02/21/%E6%8D%A2%E7%94%B5%E8%84%91%E6%80%8E%E4%B9%88%E6%9B%B4%E6%96%B0%E5%8D%9A%E5%AE%A2/</loc>
+    <loc>https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/</loc>
     
-    <lastmod>2022-02-21</lastmod>
+    <lastmod>2022-02-22</lastmod>
     
   </url>
   
@@ -179,6 +179,13 @@
   </url>
   
   <url>
+    <loc>https://www.weflink.cn/tags/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86-kafka/</loc>
+    <lastmod>2022-02-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://www.weflink.cn/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
     <lastmod>2022-02-22</lastmod>
     <changefreq>daily</changefreq>
@@ -187,13 +194,6 @@
   
   <url>
     <loc>https://www.weflink.cn/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/</loc>
-    <lastmod>2022-02-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.weflink.cn/tags/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86-kafka/</loc>
     <lastmod>2022-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -223,14 +223,14 @@
   </url>
   
   <url>
-    <loc>https://www.weflink.cn/categories/2022%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
+    <loc>https://www.weflink.cn/categories/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86/</loc>
     <lastmod>2022-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://www.weflink.cn/categories/cdc/</loc>
+    <loc>https://www.weflink.cn/categories/2022%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
     <lastmod>2022-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -244,7 +244,7 @@
   </url>
   
   <url>
-    <loc>https://www.weflink.cn/categories/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86/</loc>
+    <loc>https://www.weflink.cn/categories/cdc/</loc>
     <lastmod>2022-02-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

@@ -1,5 +1,5 @@
-https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/
 https://www.weflink.cn/2022/02/21/%E6%8D%A2%E7%94%B5%E8%84%91%E6%80%8E%E4%B9%88%E6%9B%B4%E6%96%B0%E5%8D%9A%E5%AE%A2/
+https://www.weflink.cn/2022/02/21/KAFKA%E4%B8%93%E9%A2%98/
 https://www.weflink.cn/2020/09/24/debezium2mysql_doc/
 https://www.weflink.cn/2020/09/23/%E4%BD%BF%E7%94%A8Oracle-GoldenGate%E5%90%8C%E6%AD%A5oracle%E5%8F%98%E5%8C%96%E5%88%B0kafka/
 https://www.weflink.cn/2021/03/24/Flink%E5%B8%B8%E7%94%A8%E7%AE%97%E5%AD%90/
